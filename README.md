@@ -1,1 +1,1 @@
-# ImageCaptioning-UET
+# NER-PhoNER_COVID19-UET
