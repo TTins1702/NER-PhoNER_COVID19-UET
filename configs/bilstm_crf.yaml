@@ -1,0 +1,35 @@
+experiment_name: bilstm_crf_word
+seed: 42
+
+data:
+  level: word # word | syllable
+  data_dir: data
+  min_word_freq: 1
+  max_word_len: 30
+
+model:
+  name: bilstm_crf
+  word_emb_dim: 100
+  use_char: true # false for ablation without character encoder
+  char_encoder_type: cnn # cnn | bilstm
+  char_emb_dim: 30
+  char_out_dim: 50
+  char_kernel_size: 3
+  hidden_dim: 256
+  num_layers: 1
+  dropout: 0.5
+  use_crf: true # false for BiLSTM + Softmax ablation
+
+training:
+  batch_size: 32
+  epochs: 30
+  lr: 0.001
+  weight_decay: 0.0
+  grad_clip: 5.0
+  patience: 5
+  checkpoint_dir: checkpoints/bilstm_crf
+
+logging:
+  use_wandb: true
+  wandb_project: ner-phoner-covid19-uet
+  output_dir: outputs/metrics
