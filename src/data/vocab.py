@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 from collections import Counter
 from collections.abc import Iterable, Sequence
-from typing import Any, Self
+from typing import Any, TypeVar
 
 PAD_TOKEN = "<pad>"
 UNK_TOKEN = "<unk>"
 PAD_IDX = 0
 UNK_IDX = 1
+
+_V = TypeVar("_V", bound="_BaseVocab")
 
 
 class _BaseVocab:
@@ -27,7 +31,7 @@ class _BaseVocab:
         return {"itos": list(self.itos)}
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls: type[_V], data: dict[str, Any]) -> _V:
         return cls(itos=data["itos"])
 
 
@@ -35,7 +39,7 @@ class WordVocab(_BaseVocab):
     """Word-level vocabulary mapping tokens to integer indices."""
 
     @classmethod
-    def build(cls, sentences: Iterable[Sequence[str]], min_freq: int = 1) -> Self:
+    def build(cls: type[_V], sentences: Iterable[Sequence[str]], min_freq: int = 1) -> _V:
         counts: Counter[str] = Counter()
         for sentence in sentences:
             counts.update(sentence)
@@ -54,7 +58,7 @@ class CharVocab(_BaseVocab):
     """Character-level vocabulary mapping characters inside words to indices."""
 
     @classmethod
-    def build(cls, sentences: Iterable[Sequence[str]]) -> Self:
+    def build(cls: type[_V], sentences: Iterable[Sequence[str]]) -> _V:
         itos = [PAD_TOKEN, UNK_TOKEN]
         seen = {PAD_TOKEN, UNK_TOKEN}
         for sentence in sentences:

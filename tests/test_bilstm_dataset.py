@@ -1,3 +1,4 @@
+from pathlib import Path
 from src.data.bilstm_dataset import BiLSTMDataset, bilstm_collate_fn
 from src.data.labels import IGNORE_INDEX
 from src.data.vocab import PAD_IDX, UNK_IDX, CharVocab, WordVocab
@@ -33,3 +34,8 @@ def test_bilstm_dataset_and_collate_shapes() -> None:
     assert batch["mask"].tolist() == [[True, True, True], [True, False, False]]
     assert batch["tags"][1].tolist() == [batch["tags"][1, 0].item(), IGNORE_INDEX, IGNORE_INDEX]
     assert (batch["char_ids"][1, 1:] == PAD_IDX).all()
+
+
+def test_vocab_is_python310_compatible_no_typing_self() -> None:
+    vocab_src = Path("src/data/vocab.py").read_text(encoding="utf-8")
+    assert "Self" not in vocab_src

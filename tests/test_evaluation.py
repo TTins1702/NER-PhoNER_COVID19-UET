@@ -32,3 +32,17 @@ def test_extract_entities_and_categorize_errors() -> None:
     assert report["counts"]["boundary_errors"] == 1
     assert report["counts"]["false_negatives"] == 1
     assert report["counts"]["false_positives"] == 1
+
+
+def test_extract_entities_strict_iob2_matches_seqeval_on_bio_violations() -> None:
+    assert extract_entities(["I-LOCATION", "I-LOCATION"]) == []
+    assert extract_entities(["B-LOCATION", "I-NAME"]) == [("LOCATION", 0, 1)]
+
+    words = [["Hà", "Nội"]]
+    gold = [["B-LOCATION", "I-LOCATION"]]
+    pred = [["I-LOCATION", "I-LOCATION"]]
+    metrics = compute_ner_metrics(gold, pred)
+    report = categorize_errors(words, gold, pred)
+    assert metrics["micro_f1"] == 0.0
+    assert report["counts"]["false_negatives"] == 1
+    assert report["counts"]["bio_violations"] == 1

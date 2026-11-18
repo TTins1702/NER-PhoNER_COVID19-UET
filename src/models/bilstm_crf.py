@@ -75,8 +75,9 @@ class BiLSTMCRF(nn.Module):
         char_ids: torch.Tensor | None = None,
         mask: torch.Tensor | None = None,
         tags: torch.Tensor | None = None,
+        decode: bool = True,
     ) -> dict[str, Any]:
-        """Compute emissions, optional loss, and decoded tag ID sequences."""
+        """Compute emissions, optional loss, and optional decoded tag ID sequences."""
         if mask is None:
             mask = word_ids != self.pad_idx
 
@@ -108,7 +109,7 @@ class BiLSTMCRF(nn.Module):
         if self.use_crf:
             assert self.crf is not None
             loss = self.crf(emissions, tags, mask=mask) if tags is not None else None
-            predictions = self.crf.decode(emissions, mask=mask)
+            predictions = self.crf.decode(emissions, mask=mask) if decode else []
         else:
             assert self.loss_fn is not None
             loss = (
@@ -116,9 +117,12 @@ class BiLSTMCRF(nn.Module):
                 if tags is not None
                 else None
             )
-            pred_ids = emissions.argmax(dim=-1)
-            seq_lengths = mask.long().sum(dim=1).tolist()
-            predictions = [pred_ids[b, :length].tolist() for b, length in enumerate(seq_lengths)]
+            if decode:
+                pred_ids = emissions.argmax(dim=-1)
+                seq_lengths = mask.long().sum(dim=1).tolist()
+                predictions = [pred_ids[b, :length].tolist() for b, length in enumerate(seq_lengths)]
+            else:
+                predictions = []
 
         return {
             "loss": loss,

@@ -49,3 +49,31 @@ def test_bilstm_crf_ablation_modes_forward_and_decode(use_char: bool, use_crf: b
     result["loss"].backward()
     assert result["emissions"].shape == (2, 3, 21)
     assert [len(p) for p in result["predictions"]] == [3, 1]
+
+
+def test_bilstm_crf_decode_false_skips_viterbi_decoding(monkeypatch) -> None:
+    model = BiLSTMCRF(
+        vocab_size=30,
+        char_vocab_size=20,
+        num_tags=21,
+        word_emb_dim=16,
+        char_emb_dim=8,
+        char_out_dim=12,
+        hidden_dim=16,
+        use_crf=True,
+    )
+    assert model.crf is not None
+
+    def _fail_decode(*args, **kwargs):
+        raise AssertionError("CRF decode should not run when decode=False")
+
+    monkeypatch.setattr(model.crf, "decode", _fail_decode)
+
+    word_ids = torch.tensor([[2, 3]], dtype=torch.long)
+    char_ids = torch.tensor([[[2, 3], [4, 0]]], dtype=torch.long)
+    mask = torch.tensor([[True, True]], dtype=torch.bool)
+    tags = torch.tensor([[0, 1]], dtype=torch.long)
+
+    out = model(word_ids=word_ids, char_ids=char_ids, mask=mask, tags=tags, decode=False)
+    assert out["loss"] is not None
+    assert out["predictions"] == []

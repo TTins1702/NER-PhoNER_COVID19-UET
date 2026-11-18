@@ -1,9 +1,16 @@
 from collections.abc import Sequence
 from typing import Any
 
+from src.evaluation.metrics import count_bio_violations
 
-def extract_entities(tags: Sequence[str]) -> list[tuple[str, int, int]]:
-    """Extract (entity_type, start, end) spans with half-open intervals [start, end)."""
+
+def extract_entities(tags: Sequence[str], strict_iob2: bool = True) -> list[tuple[str, int, int]]:
+    """Extract (entity_type, start, end) spans with half-open intervals [start, end).
+
+    When ``strict_iob2=True``, illegal ``I-`` tags (at sentence start, after ``O``,
+    or with a mismatched preceding entity type) do not start a span, matching
+    ``seqeval(..., mode="strict", scheme=IOB2)``.
+    """
     entities: list[tuple[str, int, int]] = []
     cur_type: str | None = None
     cur_start: int | None = None
@@ -19,8 +26,12 @@ def extract_entities(tags: Sequence[str]) -> list[tuple[str, int, int]]:
             if cur_type != tag_type:
                 if cur_type is not None and cur_start is not None:
                     entities.append((cur_type, cur_start, idx))
-                cur_type = tag_type
-                cur_start = idx
+                if strict_iob2:
+                    cur_type = None
+                    cur_start = None
+                else:
+                    cur_type = tag_type
+                    cur_start = idx
         else:
             if cur_type is not None and cur_start is not None:
                 entities.append((cur_type, cur_start, idx))
@@ -134,4 +145,7 @@ def categorize_errors(
                     },
                 )
 
-    return {"counts": counts, "examples": examples}
+    return {
+        "counts": {**counts, "bio_violations": count_bio_violations(y_pred)},
+        "examples": examples,
+    }

@@ -167,7 +167,7 @@ class Trainer:
         self.optimizer: torch.optim.Optimizer | None = None
         self.scheduler: Any | None = None
 
-    def _forward_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
+    def _forward_batch(self, batch: dict[str, Any], decode: bool = True) -> dict[str, Any]:
         if "word_ids" in batch:
             tags = batch["tags"].to(self.device) if batch.get("tags") is not None else None
             return self.model(
@@ -175,6 +175,7 @@ class Trainer:
                 char_ids=batch["char_ids"].to(self.device),
                 mask=batch["mask"].to(self.device),
                 tags=tags,
+                decode=decode,
             )
         if "input_ids" in batch:
             labels = batch["labels"].to(self.device) if batch.get("labels") is not None else None
@@ -214,7 +215,7 @@ class Trainer:
 
         for batch in dataloader:
             self.optimizer.zero_grad()
-            out = self._forward_batch(batch)
+            out = self._forward_batch(batch, decode=False)
             loss = out["loss"]
             if loss is None:
                 raise ValueError("Model returned loss=None during training")
