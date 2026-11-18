@@ -55,3 +55,17 @@ def test_end_to_end_bilstm_crf_train_and_evaluate(tmp_path: Path) -> None:
     eval_metrics = run_evaluation(cfg, checkpoint_path=best_ckpt, split="test")
     saved = json.loads(out_json.read_text(encoding="utf-8"))
     assert abs(eval_metrics["micro_f1"] - saved["test"]["micro_f1"]) < 1e-6
+
+
+def test_notebooks_are_valid_json() -> None:
+    nb_names = [
+        "01_eda_data_stats.ipynb",
+        "02_train_bilstm_crf.ipynb",
+        "04_error_analysis.ipynb",
+    ]
+    for name in nb_names:
+        path = Path("notebooks") / name
+        assert path.exists(), f"Missing {path}"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        assert data.get("nbformat") == 4
+        assert len(data.get("cells", [])) >= 3
