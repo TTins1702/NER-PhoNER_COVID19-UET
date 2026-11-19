@@ -31,5 +31,6 @@ training:
 
 logging:
   use_wandb: true
+  wandb_entity: NER-UET
   wandb_project: ner-phoner-covid19-uet
   output_dir: outputs/metrics

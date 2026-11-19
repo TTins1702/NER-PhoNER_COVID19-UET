@@ -19,11 +19,15 @@ class ExperimentLogger:
                 os.environ.setdefault("WANDB_MODE", "offline")
             import wandb
 
-            self._run = wandb.init(
-                project=log_cfg.get("wandb_project", "ner-phoner-covid19-uet"),
-                name=config.get("experiment_name"),
-                config=config,
-            )
+            entity = log_cfg.get("wandb_entity") or os.environ.get("WANDB_ENTITY") or None
+            init_kwargs: dict[str, Any] = {
+                "project": log_cfg.get("wandb_project", "ner-phoner-covid19-uet"),
+                "name": config.get("experiment_name"),
+                "config": config,
+            }
+            if entity:
+                init_kwargs["entity"] = entity
+            self._run = wandb.init(**init_kwargs)
 
     def log_metrics(self, metrics: dict[str, float], step: int | None = None) -> None:
         """Print metrics to console and forward them to W&B when enabled."""
