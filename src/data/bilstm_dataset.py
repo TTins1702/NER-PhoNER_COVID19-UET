@@ -22,11 +22,11 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from src.data.download import DEFAULT_DATA_DIR, load_split
-from src.data.labels import LABEL2ID, O_ID
+from src.data.labels import IGNORE_INDEX, LABEL2ID, O_ID
 from src.data.vocab import PAD_ID, CharVocab, WordVocab
 
 DEFAULT_MAX_WORD_LEN = 30  # từ dài nhất trong train mức từ ~23 ký tự; 30 là ngưỡng an toàn
-TAG_PAD_ID = O_ID          # = 0
+TAG_PAD_ID = IGNORE_INDEX  # = -100: khớp BiLSTMCRF/Trainer của Tín; vị trí pad cũng bị mask loại
 
 
 class BiLSTMNERDataset(Dataset):
@@ -47,7 +47,7 @@ class BiLSTMNERDataset(Dataset):
         for s in samples:
             words = list(s["words"])
             tags = s.get("tags")
-            tag_ids = [label2id[t] for t in tags] if tags is not None else [TAG_PAD_ID] * len(words)
+            tag_ids = [label2id[t] for t in tags] if tags is not None else [O_ID] * len(words)
             if len(tag_ids) != len(words):
                 raise ValueError("Số nhãn khác số từ")
             self.items.append({
@@ -55,6 +55,7 @@ class BiLSTMNERDataset(Dataset):
                 "char_ids": char_vocab.encode(words, max_len=max_word_len),
                 "tag_ids": tag_ids,
                 "words": words,
+                "gold_tags": list(tags) if tags is not None else [],
             })
 
     def __len__(self) -> int:
@@ -103,6 +104,7 @@ def bilstm_collate_fn(batch: Sequence[dict[str, Any]], word_pad_id: int = PAD_ID
         "tags": tags,
         "lengths": torch.tensor(lengths, dtype=torch.long),
         "words": [item["words"] for item in batch],
+        "gold_tags": [item.get("gold_tags", []) for item in batch],
     }
 
 

@@ -81,5 +81,5 @@ def test_bilstm_dataset_and_collate_fn_contract() -> None:
     assert batch["mask"][1].tolist() == [True, True, False, False]
     assert batch["word_ids"][1, 2:].tolist() == [0, 0]
     assert batch["tags"][1, :2].tolist() == [LABEL2ID["B-ORGANIZATION"], LABEL2ID["I-ORGANIZATION"]]
-    assert batch["tags"][1, 2:].tolist() == [0, 0]
+    assert batch["tags"][1, 2:].tolist() == [-100, -100]
     assert (batch["char_ids"][1, 2:, :] == 0).all()
