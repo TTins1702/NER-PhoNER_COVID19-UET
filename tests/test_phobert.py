@@ -115,6 +115,10 @@ class TestPhoBERTPipeline(unittest.TestCase):
         self.assertEqual(decoded[0], ["O", "O", "B-LOCATION"])
         self.assertEqual(len(decoded[0]), 3)
 
+    @unittest.skipUnless(
+        os.path.exists("data/word/dev_word.json"),
+        "PhoNER_COVID19 dataset not downloaded locally",
+    )
     def test_real_dev_dataset_and_collate(self):
         ds = PhoBERTDataset("data/word/dev_word.json", self.tokenizer, label2id=self.label2id)
         batch = phobert_collate_fn([ds[0], ds[1]], pad_token_id=self.tokenizer.pad_token_id)
@@ -151,7 +155,18 @@ class TestPhoBERTPipeline(unittest.TestCase):
         self.assertLessEqual(item["input_ids"].size(0), 12)
         self.assertEqual(int(item["input_ids"][0].item()), self.tokenizer.cls_token_id)
         self.assertEqual(int(item["input_ids"][-1].item()), self.tokenizer.sep_token_id)
+        self.assertEqual(int(item["word_mask"].sum().item()), 5)
+        self.assertEqual(item["orig_length"], 10)
+        self.assertEqual(len(item["words"]), 10)
+        self.assertEqual(len(item["gold_tags"]), 10)
         self.assertEqual(ds.get_truncation_stats(), {"total": 2, "truncated": 1})
+
+        decoded = decode_word_level_predictions(
+            [[self.label2id["B-LOCATION"]] * 5],
+            [item["orig_length"]],
+            self.id2label,
+        )
+        self.assertEqual(decoded, [["B-LOCATION"] * 5 + ["O"] * 5])
 
     def test_phobert_softmax_last_and_concat4(self):
         path = self._write_jsonl(
@@ -268,6 +283,73 @@ class TestPhoBERTPipeline(unittest.TestCase):
         )
         decoded = decode_word_level_predictions(out["predictions"], batch["orig_lengths"])
         self.assertEqual([len(seq) for seq in decoded], [3, 2])
+
+    def test_tagless_inference_dataset_and_forward(self):
+        ds = PhoBERTDataset(
+            [{"words": ["Bệnh_nhân", "ở", "Hà_Nội"]}],
+            tokenizer=self.tokenizer,
+            max_seq_length=32,
+        )
+        batch = phobert_collate_fn([ds[0]], pad_token_id=self.tokenizer.pad_token_id)
+        self.assertIsNone(batch["labels"])
+        self.assertEqual(batch["gold_tags"], [[]])
+        self.assertEqual(batch["orig_lengths"], [3])
+
+        model = PhoBERTForNER(
+            num_tags=len(self.label2id),
+            use_crf=False,
+            backbone=make_tiny_backbone(),
+        )
+        out = model(
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
+            word_mask=batch["word_mask"],
+            labels=batch["labels"],
+        )
+        self.assertIsNone(out["loss"])
+        self.assertEqual(len(out["predictions"][0]), 3)
+
+    def test_phobert_real_linear_chain_crf_and_decode_false(self):
+        records = [
+            {"words": ["Bệnh_nhân", "A", "B"], "tags": ["O", "B-NAME", "I-NAME"]},
+            {"words": ["Hà_Nội", "nay"], "tags": ["B-LOCATION", "O"]},
+        ]
+        ds = PhoBERTDataset(records, tokenizer=self.tokenizer, max_seq_length=32)
+        batch = phobert_collate_fn([ds[0], ds[1]], pad_token_id=self.tokenizer.pad_token_id)
+
+        model = PhoBERTForNER(
+            num_tags=len(self.label2id),
+            use_crf=True,
+            backbone=make_tiny_backbone(),
+        )
+        out = model(
+            input_ids=batch["input_ids"],
+            attention_mask=batch["attention_mask"],
+            word_mask=batch["word_mask"],
+            labels=batch["labels"],
+            decode=True,
+        )
+        self.assertIsNotNone(out["loss"])
+        out["loss"].backward()
+        self.assertEqual([len(p) for p in out["predictions"]], [3, 2])
+
+        def _fail_decode(*args, **kwargs):
+            raise AssertionError("CRF decode should not run when decode=False")
+
+        orig_decode = model.crf.decode
+        model.crf.decode = _fail_decode
+        try:
+            out_no_decode = model(
+                input_ids=batch["input_ids"],
+                attention_mask=batch["attention_mask"],
+                word_mask=batch["word_mask"],
+                labels=batch["labels"],
+                decode=False,
+            )
+            self.assertIsNotNone(out_no_decode["loss"])
+            self.assertEqual(out_no_decode["predictions"], [])
+        finally:
+            model.crf.decode = orig_decode
 
 
 if __name__ == "__main__":

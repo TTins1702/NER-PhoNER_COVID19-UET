@@ -68,16 +68,15 @@ class PhoBERTDataset(Dataset):
     def __getitem__(self, idx):
         sample = self.samples[idx]
         words = sample["words"]
-        tags = sample["tags"]
+        tags = sample.get("tags")
+        has_tags = tags is not None and len(tags) > 0
 
         input_ids = [self.tokenizer.cls_token_id]
-        labels = [self.ignore_index]
+        labels = [self.ignore_index] if has_tags else None
         word_mask = [False]
-        kept_words = []
-        kept_tags = []
         max_content_len = self.max_seq_length - 2
 
-        for word, tag in zip(words, tags):
+        for idx_word, word in enumerate(words):
             subword_ids = self.tokenizer.encode(word, add_special_tokens=False)
             if not subword_ids:
                 subword_ids = [self.tokenizer.unk_token_id]
@@ -86,15 +85,15 @@ class PhoBERTDataset(Dataset):
                 break
 
             input_ids.extend(subword_ids)
-            labels.append(self.label2id[tag])
-            labels.extend([self.ignore_index] * (len(subword_ids) - 1))
+            if labels is not None:
+                labels.append(self.label2id[tags[idx_word]])
+                labels.extend([self.ignore_index] * (len(subword_ids) - 1))
             word_mask.append(True)
             word_mask.extend([False] * (len(subword_ids) - 1))
-            kept_words.append(word)
-            kept_tags.append(tag)
 
         input_ids.append(self.tokenizer.sep_token_id)
-        labels.append(self.ignore_index)
+        if labels is not None:
+            labels.append(self.ignore_index)
         word_mask.append(False)
 
         attention_mask = [1] * len(input_ids)
@@ -102,11 +101,11 @@ class PhoBERTDataset(Dataset):
         return {
             "input_ids": torch.tensor(input_ids, dtype=torch.long),
             "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
-            "labels": torch.tensor(labels, dtype=torch.long),
+            "labels": torch.tensor(labels, dtype=torch.long) if labels is not None else None,
             "word_mask": torch.tensor(word_mask, dtype=torch.bool),
-            "words": kept_words,
-            "gold_tags": kept_tags,
-            "orig_length": len(kept_words),
+            "words": list(words),
+            "gold_tags": list(tags) if has_tags else [],
+            "orig_length": len(words),
         }
 
     def get_truncation_stats(self):
@@ -125,17 +124,23 @@ class PhoBERTDataset(Dataset):
 def phobert_collate_fn(batch, pad_token_id=1, ignore_index=-100):
     max_len = max(item["input_ids"].size(0) for item in batch)
     batch_size = len(batch)
+    has_labels = all(item.get("labels") is not None for item in batch)
 
     input_ids = torch.full((batch_size, max_len), pad_token_id, dtype=torch.long)
     attention_mask = torch.zeros((batch_size, max_len), dtype=torch.long)
-    labels = torch.full((batch_size, max_len), ignore_index, dtype=torch.long)
+    labels = (
+        torch.full((batch_size, max_len), ignore_index, dtype=torch.long)
+        if has_labels
+        else None
+    )
     word_mask = torch.zeros((batch_size, max_len), dtype=torch.bool)
 
     for i, item in enumerate(batch):
         seq_len = item["input_ids"].size(0)
         input_ids[i, :seq_len] = item["input_ids"]
         attention_mask[i, :seq_len] = item["attention_mask"]
-        labels[i, :seq_len] = item["labels"]
+        if labels is not None and item["labels"] is not None:
+            labels[i, :seq_len] = item["labels"]
         word_mask[i, :seq_len] = item["word_mask"]
 
     collated = {
@@ -162,7 +167,7 @@ def extract_word_level_labels(labels, word_mask, id2label=None):
     ]
 
 
-def decode_word_level_predictions(pred_ids, word_mask=None, id2label=None):
+def decode_word_level_predictions(pred_ids, word_mask=None, id2label=None, pad_tag_id=0):
     if id2label is None:
         id2label = get_label_maps()[1]
     if isinstance(pred_ids, torch.Tensor):
@@ -171,8 +176,13 @@ def decode_word_level_predictions(pred_ids, word_mask=None, id2label=None):
             for i in range(pred_ids.size(0))
         ]
     if word_mask is not None and not isinstance(word_mask, torch.Tensor):
-        return [
-            [id2label[int(p)] for p in seq[: int(length)]]
-            for seq, length in zip(pred_ids, word_mask)
-        ]
+        pad_tag = id2label[int(pad_tag_id)]
+        decoded = []
+        for seq, length in zip(pred_ids, word_mask):
+            target_len = int(length)
+            tags = [id2label[int(p)] for p in seq[:target_len]]
+            if len(tags) < target_len:
+                tags.extend([pad_tag] * (target_len - len(tags)))
+            decoded.append(tags)
+        return decoded
     return [[id2label[int(p)] for p in seq] for seq in pred_ids]

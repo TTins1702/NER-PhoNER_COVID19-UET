@@ -184,6 +184,7 @@ class Trainer:
                 attention_mask=batch["attention_mask"].to(self.device),
                 word_mask=batch["word_mask"].to(self.device),
                 labels=labels,
+                decode=decode,
             )
         raise ValueError(f"Unrecognized batch keys: {list(batch.keys())}")
 

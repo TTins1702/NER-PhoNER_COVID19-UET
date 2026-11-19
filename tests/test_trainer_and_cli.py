@@ -64,6 +64,7 @@ def test_notebooks_are_valid_json() -> None:
     nb_names = [
         "01_eda_data_stats.ipynb",
         "02_train_bilstm_crf.ipynb",
+        "03_train_phobert.ipynb",
         "04_error_analysis.ipynb",
     ]
     for name in nb_names:
@@ -76,6 +77,9 @@ def test_notebooks_are_valid_json() -> None:
         assert "<your-org>" not in text
     nb02_text = (Path("notebooks") / "02_train_bilstm_crf.ipynb").read_text(encoding="utf-8")
     assert "NER-PhoNER_COVID19-UET" in nb02_text
+    nb03_text = (Path("notebooks") / "03_train_phobert.ipynb").read_text(encoding="utf-8")
+    assert "NER-PhoNER_COVID19-UET" in nb03_text
+    assert "tin-bilstm-crf" in nb03_text
 
 
 def test_cli_scripts_run_as_subprocess_without_pythonpath() -> None:
@@ -138,3 +142,90 @@ def test_evaluate_uses_checkpoint_config_for_ablation(tmp_path: Path) -> None:
     }
     metrics_mismatched = run_evaluation(mismatched_cfg, checkpoint_path=best_ckpt, split="test")
     assert abs(metrics_mismatched["micro_f1"] - summary["test"]["micro_f1"]) < 1e-6
+
+
+def test_end_to_end_phobert_train_and_evaluate(tmp_path: Path, monkeypatch) -> None:
+    import torch
+    from transformers import RobertaConfig, RobertaModel
+    from src.training.trainer import Trainer, build_model_and_dataloaders
+    from src.utils.config import load_config
+
+    word_dir = tmp_path / "data" / "word"
+    word_dir.mkdir(parents=True)
+    sample_lines = (
+        '{"words": ["Bệnh_nhân", "19", "ở", "Hà_Nội"], "tags": ["O", "B-PATIENT_ID", "O", "B-LOCATION"]}\n'
+        '{"words": ["Bệnh_nhân", "20", "sốt"], "tags": ["O", "B-PATIENT_ID", "B-SYMPTOM_AND_DISEASE"]}\n'
+    )
+    for split in ("train", "dev", "test"):
+        (word_dir / f"{split}_word.json").write_text(sample_lines, encoding="utf-8")
+
+    class MockPhoBERTTokenizer:
+        cls_token_id = 0
+        pad_token_id = 1
+        sep_token_id = 2
+        unk_token_id = 3
+
+        def encode(self, word: str, add_special_tokens: bool = False) -> list[int]:
+            return [10, 11] if "_" in word else [10]
+
+    def _make_tiny_backbone(*args, **kwargs):
+        return RobertaModel(
+            RobertaConfig(
+                vocab_size=100,
+                hidden_size=16,
+                num_hidden_layers=4,
+                num_attention_heads=4,
+                intermediate_size=32,
+            )
+        )
+
+    monkeypatch.setattr("transformers.AutoTokenizer.from_pretrained", lambda *a, **kw: MockPhoBERTTokenizer())
+    monkeypatch.setattr("transformers.AutoModel.from_pretrained", _make_tiny_backbone)
+    monkeypatch.setattr("src.models.phobert_ner.AutoModel.from_pretrained", _make_tiny_backbone)
+
+    ckpt_dir = tmp_path / "checkpoints"
+    metrics_dir = tmp_path / "metrics"
+    cfg = load_config(
+        "configs/phobert.yaml",
+        overrides=[
+            "experiment_name=test_phobert_crf_e2e",
+            f"data.data_dir={tmp_path / 'data'}",
+            "model.use_crf=true",
+            "model.feature_mode=concat_last_4",
+            "training.batch_size=2",
+            "training.epochs=1",
+            f"training.checkpoint_dir={ckpt_dir}",
+            "logging.use_wandb=false",
+            f"logging.output_dir={metrics_dir}",
+        ],
+    )
+
+    summary = run_training(cfg)
+    best_ckpt = ckpt_dir / "best_model.pt"
+    out_json = metrics_dir / "test_phobert_crf_e2e.json"
+    assert best_ckpt.exists()
+    assert out_json.exists()
+    saved = json.loads(out_json.read_text(encoding="utf-8"))
+    assert abs(summary["test"]["micro_f1"] - saved["test"]["micro_f1"]) < 1e-6
+
+    eval_no_cfg = run_evaluation(None, checkpoint_path=best_ckpt, split="test")
+    assert abs(eval_no_cfg["micro_f1"] - saved["test"]["micro_f1"]) < 1e-6
+
+    base_cfg = load_config("configs/phobert.yaml")
+    base_cfg["data"]["data_dir"] = str(tmp_path / "data")
+    eval_with_base_cfg = run_evaluation(base_cfg, checkpoint_path=best_ckpt, split="test")
+    assert abs(eval_with_base_cfg["micro_f1"] - saved["test"]["micro_f1"]) < 1e-6
+
+    # Verify Trainer.train_epoch passes decode=False to PhoBERTForNER (skipping CRF decode)
+    records = [
+        {"words": ["Bệnh_nhân", "19", "ở", "Hà_Nội"], "tags": ["O", "B-PATIENT_ID", "O", "B-LOCATION"]},
+    ]
+    model, loaders, _ = build_model_and_dataloaders(cfg, {"train": records})
+    trainer = Trainer(model=model, config=cfg, device=torch.device("cpu"))
+
+    def _fail_decode(*args, **kwargs):
+        raise AssertionError("CRF decode should not run during Trainer.train_epoch")
+
+    monkeypatch.setattr(model.crf, "decode", _fail_decode)
+    train_loss = trainer.train_epoch(loaders["train"])
+    assert train_loss >= 0.0

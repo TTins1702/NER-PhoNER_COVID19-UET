@@ -98,25 +98,39 @@ class PhoBERTNER(nn.Module):
                 features, word_mask, labels
             )
             emissions = self.classifier(self.dropout(word_feats))
-            result = {"emissions": emissions, "word_level_mask": word_level_mask}
-            if labels is not None:
-                result["loss"] = self.crf(emissions, word_labels, word_level_mask)
-            if decode:
-                result["predictions"] = self.crf.decode(emissions, word_level_mask)
-            return result
+            loss = (
+                self.crf(emissions, word_labels, word_level_mask)
+                if labels is not None
+                else None
+            )
+            predictions = (
+                self.crf.decode(emissions, word_level_mask) if decode else []
+            )
+            return {
+                "loss": loss,
+                "emissions": emissions,
+                "word_level_mask": word_level_mask,
+                "predictions": predictions,
+            }
 
         logits = self.classifier(self.dropout(features))
-        result = {"logits": logits}
-        if labels is not None:
-            result["loss"] = self.loss_fn(
-                logits.view(-1, logits.size(-1)), labels.view(-1)
-            )
+        loss = (
+            self.loss_fn(logits.view(-1, logits.size(-1)), labels.view(-1))
+            if labels is not None
+            else None
+        )
         if decode and word_mask is not None:
             pred_ids = logits.argmax(dim=-1)
-            result["predictions"] = [
+            predictions = [
                 pred_ids[i][word_mask[i]].tolist() for i in range(pred_ids.size(0))
             ]
-        return result
+        else:
+            predictions = []
+        return {
+            "loss": loss,
+            "logits": logits,
+            "predictions": predictions,
+        }
 
     def decode(self, input_ids, attention_mask, word_mask):
         out = self.forward(
