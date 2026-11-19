@@ -31,7 +31,7 @@ batch = next(iter(loaders["train"]))
 | `word_ids` | `torch.long` | `[B, L]` | id từ trong `WordVocab`; vị trí pad = `0` (`<pad>`), từ lạ = `1` (`<unk>`) |
 | `char_ids` | `torch.long` | `[B, L, W]` | id ký tự trong `CharVocab`; pad (cả từ pad lẫn phần đuôi từ ngắn) = `0` |
 | `mask` | `torch.bool` | `[B, L]` | `True` ở từ thật, `False` ở pad. Luôn có dạng `[True…True, False…False]` |
-| `tags` | `torch.long` | `[B, L]` | id nhãn theo `LABEL2ID`; vị trí pad = `0` (nhãn `O`), **phải** bỏ qua bằng `mask` |
+| `tags` | `torch.long` | `[B, L]` | id nhãn theo `LABEL2ID`; vị trí pad = `-100` (`IGNORE_INDEX`), **phải** bỏ qua bằng `mask` |
 | `lengths` | `torch.long` (CPU) | `[B]` | số từ thật mỗi câu = `mask.sum(1)`, dùng cho `pack_padded_sequence(..., enforce_sorted=False)` |
 | `words` | `list[list[str]]` | `B` câu | từ gốc, dùng để ghi file dự đoán |
 
@@ -39,7 +39,7 @@ batch = next(iter(loaders["train"]))
   (bị chặn bởi `max_word_len`, mặc định 30).
 - Batch **không** bị sắp xếp lại: câu thứ `i` trong batch là câu thứ `i` của tập (khi `shuffle=False`),
   nên dự đoán ghép lại được với file gốc.
-- Pad tag bằng `0` (không phải `-100`) vì CRF cần chỉ số hợp lệ để `gather`; loss CRF đã nhân `mask`.
+- Pad tag bằng `-100` (`IGNORE_INDEX`) để khớp `BiLSTMCRF`/`Trainer` của Tín; vị trí pad đã bị `mask` loại khỏi loss. Batch có thêm khóa `gold_tags` (list nhãn gốc theo câu) cho bước đánh giá.
   Khi ablation `use_crf=False`: `loss = F.cross_entropy(emissions[mask], tags[mask])`.
 - Nhúng ký tự: `nn.Embedding(len(char_vocab), dim, padding_idx=char_vocab.pad_id)`;
   nhúng từ: `nn.Embedding(len(word_vocab), dim, padding_idx=word_vocab.pad_id)`.

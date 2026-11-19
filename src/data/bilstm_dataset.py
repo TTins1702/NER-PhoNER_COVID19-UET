@@ -7,7 +7,7 @@ Tại sao viết như vậy:
   nhỏ và nhanh. `L` = câu dài nhất trong batch, `W` = từ dài nhất trong batch.
 - `mask` kiểu bool, True ở từ thật: CRF dùng mask để (1) không cộng điểm của vị trí pad vào s(x, y),
   (2) giữ nguyên alpha khi đi qua vị trí pad trong thuật toán Forward, (3) dừng Viterbi đúng độ dài.
-- Pad nhãn bằng 0 (`O`) chứ không phải -100 vì CRF phải `gather` theo nhãn ở mọi vị trí; vị trí pad đã
+- Pad nhãn bằng -100 (`IGNORE_INDEX`) để khớp BiLSTMCRF/Trainer của Tín; vị trí pad đã
   bị mask loại khỏi loss. `lengths` để dùng `pack_padded_sequence` (BiLSTM không đọc token pad,
   nên trạng thái của luồng phải->trái không bị nhiễm pad).
 - Không sắp xếp lại câu trong batch: dự đoán ghép lại đúng thứ tự file gốc.
@@ -73,7 +73,7 @@ def bilstm_collate_fn(batch: Sequence[dict[str, Any]], word_pad_id: int = PAD_ID
         word_ids : torch.LongTensor [B, L]     id từ, pad = 0
         char_ids : torch.LongTensor [B, L, W]  id ký tự, pad = 0
         mask     : torch.BoolTensor [B, L]     True = từ thật, False = pad
-        tags     : torch.LongTensor [B, L]     id nhãn (LABEL2ID), pad = 0 (bỏ qua bằng mask)
+        tags     : torch.LongTensor [B, L]     id nhãn (LABEL2ID), pad = -100 (IGNORE_INDEX, bỏ qua bằng mask)
         lengths  : torch.LongTensor [B]        số từ thật mỗi câu (CPU, cho pack_padded_sequence)
         words    : list[list[str]]             từ gốc
     với B = số câu, L = số từ của câu dài nhất trong batch, W = số ký tự của từ dài nhất trong batch.
