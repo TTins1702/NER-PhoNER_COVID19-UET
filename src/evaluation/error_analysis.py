@@ -359,3 +359,93 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+def _spans_overlap(a_start: int, a_end: int, b_start: int, b_end: int) -> bool:
+    return max(a_start, b_start) < min(a_end, b_end)
+
+
+def categorize_errors(
+    words_list: Sequence[Sequence[str]],
+    y_true: Sequence[Sequence[str]],
+    y_pred: Sequence[Sequence[str]],
+    max_examples_per_category: int = 50,
+) -> dict[str, Any]:
+    """Giao diện gọn mà code của Tín dùng: phân loại lỗi thành 4 nhóm + đếm vi phạm IOB2.
+
+    Trả về {"counts": {type_errors, boundary_errors, false_negatives, false_positives, bio_violations},
+    "examples": {nhóm: [ví dụ, tối đa max_examples_per_category]}}.
+    Bản đầy đủ theo từng loại thực thể là `analyze_errors`.
+    """
+    from src.evaluation.metrics import count_bio_violations  # import trong hàm để tránh import vòng
+
+    categories = ("type_errors", "boundary_errors", "false_negatives", "false_positives")
+    counts = {cat: 0 for cat in categories}
+    examples: dict[str, list[dict[str, Any]]] = {cat: [] for cat in categories}
+
+    def _record(category: str, payload: dict[str, Any]) -> None:
+        counts[category] += 1
+        if len(examples[category]) < max_examples_per_category:
+            examples[category].append(payload)
+
+    for sent_idx, (words, gold_tags, pred_tags) in enumerate(zip(words_list, y_true, y_pred)):
+        gold_spans = extract_entities(gold_tags)
+        pred_spans = extract_entities(pred_tags)
+        matched_gold: set[int] = set()
+        matched_pred: set[int] = set()
+        sentence = " ".join(words)
+
+        # 1. Trùng khít ranh giới: đúng loại thì là correct, sai loại thì là type_errors
+        for g_idx, (g_type, g_s, g_e) in enumerate(gold_spans):
+            for p_idx, (p_type, p_s, p_e) in enumerate(pred_spans):
+                if p_idx in matched_pred:
+                    continue
+                if g_s == p_s and g_e == p_e:
+                    matched_gold.add(g_idx)
+                    matched_pred.add(p_idx)
+                    if g_type != p_type:
+                        _record("type_errors", {
+                            "sentence_idx": sent_idx, "text": " ".join(words[g_s:g_e]),
+                            "gold_type": g_type, "pred_type": p_type,
+                            "span": (g_s, g_e), "sentence": sentence,
+                        })
+                    break
+
+        # 2. Chồng lấn nhưng lệch ranh giới
+        for g_idx, (g_type, g_s, g_e) in enumerate(gold_spans):
+            if g_idx in matched_gold:
+                continue
+            for p_idx, (p_type, p_s, p_e) in enumerate(pred_spans):
+                if p_idx in matched_pred:
+                    continue
+                if _spans_overlap(g_s, g_e, p_s, p_e):
+                    matched_gold.add(g_idx)
+                    matched_pred.add(p_idx)
+                    _record("boundary_errors", {
+                        "sentence_idx": sent_idx,
+                        "gold_text": " ".join(words[g_s:g_e]), "pred_text": " ".join(words[p_s:p_e]),
+                        "gold_type": g_type, "pred_type": p_type,
+                        "gold_span": (g_s, g_e), "pred_span": (p_s, p_e), "sentence": sentence,
+                    })
+                    break
+
+        # 3. Gold không được khớp -> false_negatives
+        for g_idx, (g_type, g_s, g_e) in enumerate(gold_spans):
+            if g_idx not in matched_gold:
+                _record("false_negatives", {
+                    "sentence_idx": sent_idx, "text": " ".join(words[g_s:g_e]),
+                    "gold_type": g_type, "span": (g_s, g_e), "sentence": sentence,
+                })
+
+        # 4. Pred không được khớp -> false_positives
+        for p_idx, (p_type, p_s, p_e) in enumerate(pred_spans):
+            if p_idx not in matched_pred:
+                _record("false_positives", {
+                    "sentence_idx": sent_idx, "text": " ".join(words[p_s:p_e]),
+                    "pred_type": p_type, "span": (p_s, p_e), "sentence": sentence,
+                })
+
+    return {
+        "counts": {**counts, "bio_violations": count_bio_violations(y_pred)},
+        "examples": examples,
+    }
