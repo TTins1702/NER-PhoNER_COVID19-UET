@@ -206,6 +206,17 @@ def load_all_splits(level: str = "word", data_dir: Path | str = DEFAULT_DATA_DIR
     return {split: load_split(split, level, data_dir) for split in splits}
 
 
+def load_phoner_split(data_dir: Path | str = DEFAULT_DATA_DIR, level: str = "word", split: str = "train") -> list[Sample]:
+    """Đọc 1 split PhoNER_COVID19 theo chữ ký mà code của Tín gọi.
+
+    Đường dẫn: `<data_dir>/<level>/<split>_<level>.json`. Là lớp bọc mỏng quanh `load_jsonl`.
+    """
+    if level not in LEVELS:
+        raise ValueError(f"Unsupported level {level!r}; expected one of {LEVELS}")
+    if split not in SPLITS:
+        raise ValueError(f"Unsupported split {split!r}; expected one of {SPLITS}")
+    return load_jsonl(Path(data_dir) / level / f"{split}_{level}.json")
+
 def save_jsonl(samples: Iterable[Sample], path: Path | str) -> None:
     """Ghi danh sách câu ra JSONL (dùng cho test và dữ liệu giả)."""
     path = Path(path)
