@@ -36,6 +36,10 @@ def latex_escape(text: str) -> str:
     return "".join(repl.get(ch, ch) for ch in str(text))
 
 
+def _restore_math_signs(escaped: str) -> str:
+    """Khôi phục dấu $-$ / $+$ (chế độ toán) bị latex_escape thoát nhầm."""
+    return escaped.replace(r"\$-\$", "$-$").replace(r"\$+\$", "$+$")
+
 def is_dummy_result(result: dict[str, Any]) -> bool:
     """Kiểm tra xem một dict kết quả có phải dữ liệu giả (`DUMMY_`) hay không."""
     name = str(result.get("experiment_name", ""))
@@ -272,7 +276,7 @@ def generate_ablation_table(
                 diff = cur_f1 - ref_f1
                 delta_str = f"{diff:+.2f}"
             bio_str = str(r["bio_violations"]["pred"]["total"])
-        lines.append(f"{latex_escape(disp)} & {mic_strs[i]} & {mac_strs[i]} & {delta_str} & {bio_str} \\\\")
+        lines.append(f"{_restore_math_signs(latex_escape(disp))} & {mic_strs[i]} & {mac_strs[i]} & {delta_str} & {bio_str} \\\\")
 
     lines += [
         r"\hline",
