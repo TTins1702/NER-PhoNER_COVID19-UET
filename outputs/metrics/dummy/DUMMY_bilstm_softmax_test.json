@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "experiment_name": "DUMMY_bilstm_softmax",
+  "description": "BiLSTM-Softmax (DUMMY)",
+  "model": "bilstm_crf",
+  "group": "ablation_bilstm",
+  "is_ablation_reference": false,
+  "split": "test",
+  "level": "word",
+  "eval_mode": "seqeval-strict-IOB2",
+  "repaired_bio": false,
+  "num_sentences": 3000,
+  "num_tokens": 85678,
+  "num_gold_entities": 11735,
+  "num_pred_entities": 10580,
+  "overall": {
+    "micro": {
+      "precision": 0.7909262759924386,
+      "recall": 0.7130805283340435,
+      "f1": 0.7499887967734707,
+      "support": 11735
+    },
+    "macro": {
+      "precision": 0.6877857140806751,
+      "recall": 0.707619518921203,
+      "f1": 0.6892420147789127,
+      "support": 11735
+    },
+    "weighted": {
+      "precision": 0.8066084230654081,
+      "recall": 0.7130805283340435,
+      "f1": 0.7540151855093337,
+      "support": 11735
+    }
+  },
+  "per_entity": {
+    "AGE": {
+      "precision": 0.6807432432432432,
+      "recall": 0.6924398625429553,
+      "f1": 0.686541737649063,
+      "support": 582
+    },
+    "DATE": {
+      "precision": 0.836376404494382,
+      "recall": 0.7200725513905684,
+      "f1": 0.7738791423001949,
+      "support": 1654
+    },
+    "GENDER": {
+      "precision": 0.6617021276595745,
+      "recall": 0.6731601731601732,
+      "f1": 0.6673819742489271,
+      "support": 462
+    },
+    "JOB": {
+      "precision": 0.46037735849056605,
+      "recall": 0.7052023121387283,
+      "f1": 0.5570776255707762,
+      "support": 173
+    },
+    "LOCATION": {
+      "precision": 0.8853503184713376,
+      "recall": 0.7198829092546724,
+      "f1": 0.7940884252359662,
+      "support": 4441
+    },
+    "NAME": {
+      "precision": 0.5567010309278351,
+      "recall": 0.6792452830188679,
+      "f1": 0.6118980169971672,
+      "support": 318
+    },
+    "ORGANIZATION": {
+      "precision": 0.725699067909454,
+      "recall": 0.7068741893644618,
+      "f1": 0.7161629434954008,
+      "support": 771
+    },
+    "PATIENT_ID": {
+      "precision": 0.8296639629200464,
+      "recall": 0.714214463840399,
+      "f1": 0.7676226212811579,
+      "support": 2005
+    },
+    "SYMPTOM_AND_DISEASE": {
+      "precision": 0.7732949087415946,
+      "recall": 0.7086267605633803,
+      "f1": 0.7395498392282959,
+      "support": 1136
+    },
+    "TRANSPORTATION": {
+      "precision": 0.46794871794871795,
+      "recall": 0.7564766839378239,
+      "f1": 0.5782178217821782,
+      "support": 193
+    }
+  },
+  "bio_violations": {
+    "pred": {
+      "total": 555,
+      "by_type": {
+        "AGE": 46,
+        "DATE": 72,
+        "GENDER": 32,
+        "JOB": 9,
+        "LOCATION": 210,
+        "NAME": 14,
+        "ORGANIZATION": 35,
+        "PATIENT_ID": 83,
+        "SYMPTOM_AND_DISEASE": 49,
+        "TRANSPORTATION": 5
+      },
+      "sentences_with_violation": 489,
+      "num_tokens": 85678,
+      "per_1k_tokens": 6.4777
+    },
+    "gold": {
+      "total": 0,
+      "by_type": {
+        "AGE": 0,
+        "DATE": 0,
+        "GENDER": 0,
+        "JOB": 0,
+        "LOCATION": 0,
+        "NAME": 0,
+        "ORGANIZATION": 0,
+        "PATIENT_ID": 0,
+        "SYMPTOM_AND_DISEASE": 0,
+        "TRANSPORTATION": 0
+      },
+      "sentences_with_violation": 0,
+      "num_tokens": 85678,
+      "per_1k_tokens": 0.0
+    }
+  },
+  "config": {},
+  "extra": {},
+  "created_at": "2026-11-19T17:59:41+07:00"
+}

@@ -1,0 +1,111 @@
+% acl_uet.sty — Định dạng chuẩn ACL (A4, 2 cột, chế độ [final] không ẩn danh) hỗ trợ XeLaTeX/LuaLaTeX tiếng Việt.
+% Tuân thủ đầy đủ thông số hình học & cỡ chữ ACL:
+%   - Khổ A4 (210mm x 297mm), hai cột
+%   - Lề trên/dưới/trái/phải: 2.5 cm; độ rộng mỗi cột: 7.7 cm; khe giữa hai cột: 0.6 cm
+%   - Font Times: tiêu đề 15pt đậm; tác giả & section 12pt đậm; subsection 11pt đậm;
+%     nội dung 11pt; abstract/caption/bibliography 10pt; footnote 9pt.
+%   - Chế độ [final]: không đánh số trang, không kẻ thước dòng (ruler), hiển thị tên tác giả.
+%   - Link màu #000099 không gạch chân.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{acl_uet}[2026/11/19 ACL Final Style for UET Deep Learning Course]
+
+\DeclareOption{final}{}
+\DeclareOption{review}{}
+\ProcessOptions\relax
+
+\RequirePackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm,columnsep=0.6cm]{geometry}
+\setlength{\textwidth}{16.0cm}
+\setlength{\columnsep}{0.6cm}
+\setlength{\parindent}{0.4cm}
+\setlength{\parskip}{0pt}
+
+% Hỗ trợ tiếng Việt trên XeLaTeX / LuaLaTeX (và tự động tương thích nếu biên dịch bằng pdfLaTeX)
+\RequirePackage{iftex}
+\ifTUTeX
+  \RequirePackage{fontspec}
+  \IfFontExistsTF{Times New Roman}{
+    \setmainfont{Times New Roman}
+  }{
+    \IfFontExistsTF{TeX Gyre Termes}{
+      \setmainfont{TeX Gyre Termes}
+    }{}
+  }
+\else
+  \RequirePackage[utf8]{inputenc}
+  \RequirePackage[T5]{fontenc}
+  \RequirePackage{newtxtext,newtxmath}
+\fi
+
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{xcolor}
+\RequirePackage{caption}
+\RequirePackage{natbib}
+
+% Màu liên kết chuẩn ACL (#000099), không khung, không gạch chân
+\definecolor{acldarkblue}{HTML}{000099}
+\RequirePackage[colorlinks=true,linkcolor=acldarkblue,citecolor=acldarkblue,urlcolor=acldarkblue]{hyperref}
+
+% Bản final không đánh số trang
+\pagestyle{empty}
+\thispagestyle{empty}
+
+% Định dạng Caption: 10pt, đặt dưới hình/bảng, 1 dòng thì căn giữa
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  labelsep=colon,
+  justification=centering,
+  singlelinecheck=true
+}
+
+% Định dạng tiêu đề mục: Section 12pt đậm, Subsection 11pt đậm
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+  {-2.0ex \@plus -0.5ex \@minus -0.2ex}%
+  {0.8ex \@plus 0.2ex}%
+  {\normalfont\fontsize{12}{14}\selectfont\bfseries}}
+
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+  {-1.5ex \@plus -0.4ex \@minus -0.2ex}%
+  {0.5ex \@plus 0.2ex}%
+  {\normalfont\fontsize{11}{13}\selectfont\bfseries}}
+
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+  {-1.2ex \@plus -0.3ex \@minus -0.2ex}%
+  {0.4ex \@plus 0.1ex}%
+  {\normalfont\fontsize{11}{13}\selectfont\bfseries}}
+
+% Định dạng Tiêu đề bài báo (15pt đậm) và Tác giả (12pt đậm)
+\renewcommand{\@maketitle}{%
+  \newpage
+  \null
+  \vskip 0.2cm%
+  \begin{center}%
+    {\fontsize{15}{18}\selectfont\bfseries \@title \par}%
+    \vskip 0.5cm%
+    {\fontsize{12}{14}\selectfont\bfseries
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+  \end{center}%
+  \vskip 0.4cm%
+}
+
+% Định dạng Abstract (10pt)
+\renewenvironment{abstract}{%
+  \centerline{\fontsize{12}{14}\selectfont\bfseries Tóm tắt (Abstract)}%
+  \vspace{0.5ex}%
+  \begin{quote}\fontsize{10}{12}\selectfont
+}{%
+  \end{quote}\vspace{1ex}%
+}
+
+% Định dạng Tài liệu tham khảo (10pt, không đánh số, xếp theo chữ cái)
+\setlength{\bibsep}{3pt}
+\renewcommand{\bibfont}{\fontsize{10}{12}\selectfont}
+\bibliographystyle{acl_natbib}

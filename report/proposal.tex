@@ -1,0 +1,118 @@
+% proposal.tex — Đề xuất Đề tài (Proposal — tối đa 2 trang chuẩn ACL)
+% Biên dịch bằng XeLaTeX hoặc LuaLaTeX:
+%   xelatex proposal.tex && bibtex proposal && xelatex proposal.tex && xelatex proposal.tex
+
+\documentclass[11pt,a4paper,twocolumn]{article}
+\usepackage[final]{acl_uet}
+
+\title{Đề xuất Bài tập lớn (Proposal): Nhận dạng Thực thể Có tên Tiếng Việt\\
+trên Bộ dữ liệu \texttt{PhoNER\_COVID19}}
+
+\author{
+  Đạt (\texttt{[CHỜ SỐ LIỆU: MSSV Đạt]}) \quad
+  Tín (\texttt{[CHỜ SỐ LIỆU: MSSV Tín]}) \quad
+  Đức Anh (\texttt{[CHỜ SỐ LIỆU: MSSV Đức Anh]}) \\
+  Khoa Công nghệ Thông tin, Trường Đại học Công nghệ — ĐHQGHN (UET-VNU) \\
+  \texttt{\{dat, tin, ducanh\}@vnu.edu.vn}
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+% =============================================================================
+\section{Bài toán và Phát biểu Đầu vào / Đầu ra}
+Nhận dạng thực thể có tên (Named Entity Recognition — NER) là bài toán xác định ranh giới và phân loại các cụm từ mang thông tin định danh quan trọng trong văn bản thành những loại thực thể định trước. Trong đề tài này, nhóm tập trung vào bài toán NER tiếng Việt trên miền bản tin dịch tễ COVID-19 \citep{truong-etal-2021-covid}.
+
+\paragraph{Đầu vào (Input):}
+Một câu tiếng Việt gồm $N$ token $\mathbf{x} = (x_1, x_2, \dots, x_N)$. Ở chế độ mặc định mức từ (\texttt{word-level}), các âm tiết thuộc cùng một từ ghép tiếng Việt được nối với nhau bằng dấu gạch dưới \texttt{``\_''} (ví dụ: \texttt{[``Bệnh\_viện'', ``Bạch\_Mai'', ``rất'', ``lớn'']}). Kiến trúc dữ liệu của nhóm đồng thời hỗ trợ chuyển sang mức âm tiết (\texttt{syllable-level}, mỗi âm tiết là một token độc lập) chỉ bằng một tham số cấu hình.
+
+\paragraph{Đầu ra (Output):}
+Chuỗi nhãn $\hat{\mathbf{y}} = (\hat{y}_1, \hat{y}_2, \dots, \hat{y}_N)$ có độ dài đúng bằng $N$ theo lược đồ \textbf{IOB2} (\texttt{B-}$c$ cho token đầu thực thể loại $c$, \texttt{I-}$c$ cho token bên trong thực thể loại $c$, và \texttt{O} cho token ngoài thực thể), từ đó trích xuất danh sách các thực thể $(c_k, s_k, e_k)$ gồm loại thực thể và vị trí span. Bộ nhãn cố định gồm $21$ nhãn BIO (\texttt{O} có chỉ số $0$, cùng cặp \texttt{B-}/\texttt{I-} của $10$ loại thực thể xếp theo thứ tự bảng chữ cái).
+
+% =============================================================================
+\section{Bộ dữ liệu \texttt{PhoNER\_COVID19} và Phân tích Sơ bộ (EDA)}
+Nhóm sử dụng bộ dữ liệu công khai \texttt{PhoNER\_COVID19} do VinAI Research công bố \citep{truong-etal-2021-covid}. Nhóm đã hoàn tất kịch bản tải tự động (\texttt{src/data/download.py}) và chạy phân tích khám phá trên toàn bộ dữ liệu (\texttt{notebooks/01\_eda\_data\_stats.ipynb}):
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrrrrr}
+\hline
+\textbf{Tập (Word)} & \textbf{Số câu} & \textbf{Số từ} & \textbf{Dài TB} & \textbf{Thực thể} & \textbf{\% O} \\
+\hline
+\texttt{train} & $5.027$ & $132.511$ & $26{,}36$ & $15.767$ & $79{,}05\%$ \\
+\texttt{dev}   & $2.000$ & $56.283$  & $28{,}14$ & $7.478$  & $74{,}92\%$ \\
+\texttt{test}  & $3.000$ & $85.678$  & $28{,}56$ & $11.735$ & $74{,}17\%$ \\
+\hline
+\textbf{Tổng}  & $10.027$& $274.472$ & $27{,}37$ & $34.980$ & $76{,}68\%$ \\
+\hline
+\end{tabular}
+\caption{Thống kê $3$ tập dữ liệu \texttt{PhoNER\_COVID19} ở mức từ.}
+\label{tab:prop_splits}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\hline
+\textbf{Loại thực thể (Tên trong data)} & \textbf{Train} & \textbf{Dev} & \textbf{Test} & \textbf{Tỉ trọng} \\
+\hline
+\texttt{LOCATION}              & $5.398$ & $2.737$ & $4.441$ & $35{,}95\%$ \\
+\texttt{PATIENT\_ID}           & $3.240$ & $1.276$ & $2.005$ & $18{,}64\%$ \\
+\texttt{DATE}                  & $2.549$ & $1.103$ & $1.654$ & $15{,}17\%$ \\
+\texttt{SYMPTOM\_AND\_DISEASE} & $1.439$ & $766$   & $1.136$ & $9{,}55\%$  \\
+\texttt{ORGANIZATION}          & $1.137$ & $551$   & $771$   & $7{,}03\%$  \\
+\texttt{AGE}                   & $682$   & $361$   & $582$   & $4{,}65\%$  \\
+\texttt{GENDER}                & $542$   & $277$   & $462$   & $3{,}66\%$  \\
+\texttt{NAME} (\texttt{PERSON\_NAME}) & $349$ & $188$ & $318$ & $2{,}44\%$  \\
+\texttt{JOB} (\texttt{OCCUPATION})    & $205$ & $132$ & $173$ & $1{,}46\%$  \\
+\texttt{TRANSPORTATION}        & $226$   & $87$    & $193$   & $1{,}45\%$  \\
+\hline
+\end{tabular}
+\caption{Phân bố $10$ loại thực thể trên \texttt{PhoNER\_COVID19}.}
+\label{tab:prop_entities}
+\end{table}
+
+Ba phát hiện chính từ EDA định hướng trực tiếp cho thiết kế mô hình:
+(1) \textbf{Mất cân bằng lớp mạnh:} \texttt{LOCATION} và \texttt{PATIENT\_ID} chiếm $54{,}59\%$ tổng số thực thể, trong khi \texttt{JOB} và \texttt{TRANSPORTATION} mỗi loại chỉ chiếm $\approx 1{,}45\%$, đòi hỏi phải báo cáo cả Macro-F1 và F1 riêng của từng loại;
+(2) \textbf{Từ ngoài từ điển (OOV) tập trung ở thực thể mới:} Tỉ lệ OOV toàn tập \texttt{test} so với từ điển \texttt{train} ($5.169$ từ) là $2{,}96\%$, nhưng lên tới $38{,}4\%$ ở \texttt{NAME}, $34{,}7\%$ ở \texttt{TRANSPORTATION} và $14{,}7\%$ ở \texttt{PATIENT\_ID}, chứng minh sự cần thiết của tầng \texttt{Character Embedding};
+(3) \textbf{Độ dài thực thể khác biệt:} \texttt{ORGANIZATION} dài trung bình $3{,}24$ từ (tối đa $14$ từ), dễ xảy ra lỗi gãy ranh giới nếu thiếu tầng \texttt{CRF}.
+
+% =============================================================================
+\section{Phương pháp \& Mô hình Baseline Dự kiến}
+Nhóm triển khai và đối sánh hai nhánh mô hình chính:
+\begin{enumerate}
+  \item \textbf{Mô hình 1 — \texttt{BiLSTM-CRF} có Character Embedding tự cài đặt từ đầu} \citep{lample-etal-2016-neural,ma-hovy-2016-end}: Ghép vector từ \texttt{WordEmbedding} với vector hình thái từ \texttt{CharEncoder} (1D-CNN + MaxPool), đưa qua bộ mã hóa ngữ cảnh hai chiều \texttt{BiLSTM} (dùng \texttt{pack\_padded\_sequence}). Đặc biệt, nhóm \textbf{tự cài đặt hoàn toàn tầng \texttt{Linear-chain CRF} từ đầu} bằng PyTorch (không dùng thư viện \texttt{pytorch-crf}): tự viết hàm \texttt{log\_sum\_exp} ổn định số học, thuật toán quy hoạch động \textbf{Forward} có xử lý \texttt{mask} để tính hàm mất mát $-\log P(\mathbf{y}\mid\mathbf{x})$ và thuật toán \textbf{Viterbi} để giải mã.
+  \item \textbf{Mô hình 2 — Tinh chỉnh \texttt{PhoBERT} (\texttt{vinai/phobert-base-v2})} \citep{nguyen-nguyen-2020-phobert}: Giải quyết bài toán một từ bị tách thành nhiều BPE subword bằng quy tắc \textbf{First-Subword Alignment} (chỉ gán nhãn gốc cho subword đầu tiên của mỗi từ, các subword sau gán \texttt{ignore\_index = -100}), tối ưu bằng \texttt{AdamW} với tốc độ học phân tầng (\textit{differential learning rate}) và khảo sát cả hai đầu dự đoán \texttt{Softmax} và \texttt{CRF}.
+\end{enumerate}
+
+% =============================================================================
+\section{Cách thức Đánh giá và Phân tích}
+Không chấm điểm ở mức subword hay token rời rạc (\texttt{sklearn}). Mọi dự đoán được quy về đúng độ dài câu mức từ gốc $\text{len}(\text{\texttt{words}})$ và đánh giá ở \textbf{mức thực thể nghiêm ngặt} qua \texttt{seqeval} (\texttt{mode="strict", scheme=IOB2}). Một thực thể chỉ được tính là đúng khi trùng khớp hoàn toàn cả ranh giới đầu--cuối lẫn loại nhãn. Nhóm báo cáo Precision, Recall, Micro-F1, Macro-F1, F1 của từng loại trong $10$ loại thực thể, số lượng lỗi vi phạm quy tắc BIO và phân loại tự động $4$ nhóm lỗi (\textit{Boundary, Type, FP, FN}).
+
+% =============================================================================
+\section{Phân công Nhiệm vụ và Lộ trình 6 Tuần}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{1.4cm}p{5.7cm}}
+\hline
+\textbf{Thành viên} & \textbf{Phân hệ phụ trách \& Lộ trình} \\
+\hline
+\textbf{Đạt} & \textbf{Data Pipeline, Evaluation, Error Analysis \& Demo:} \texttt{src/data/} (\texttt{download, labels, vocab, bilstm\_dataset}), \texttt{src/evaluation/} (\texttt{metrics, error\_analysis, plots, latex\_tables}), \texttt{notebooks/01\_eda}, \texttt{04\_error\_analysis}, \texttt{tests/}, \texttt{app/} (Demo Gradio). \\
+\hline
+\textbf{Tín} & \textbf{BiLSTM-CRF From Scratch \& Ablation:} \texttt{src/models/char\_encoder.py}, \texttt{crf.py} (Forward + Viterbi), \texttt{bilstm\_crf.py}, \texttt{02\_train\_bilstm\_crf.ipynb}, Ablation bật/tắt CRF và CharCNN. \\
+\hline
+\textbf{Đức Anh} & \textbf{PhoBERT Fine-tuning \& Ablation:} \texttt{src/data/phobert\_dataset.py} (Subword alignment), \texttt{src/models/phobert\_ner.py}, \texttt{03\_train\_phobert.ipynb}, Ablation Freeze/Full, Last-layer/Concat-4, Softmax/CRF. \\
+\hline
+\end{tabular}
+\caption{Phân công nhiệm vụ độc lập theo mô-đun cho $3$ thành viên (Tuần 1: Proposal \& Data; Tuần 2--3: Baseline \& Milestone; Tuần 4--5: Ablation, Error Analysis \& Demo; Tuần 6: Báo cáo cuối 8 trang ACL \& Bảo vệ).}
+\label{tab:prop_team}
+\end{table}
+
+\bibliography{references}
+\end{document}

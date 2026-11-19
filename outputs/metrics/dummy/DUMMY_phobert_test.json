@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "experiment_name": "DUMMY_phobert",
+  "description": "PhoBERT (DUMMY)",
+  "model": "phobert",
+  "group": "main",
+  "is_ablation_reference": true,
+  "split": "test",
+  "level": "word",
+  "eval_mode": "seqeval-strict-IOB2",
+  "repaired_bio": false,
+  "num_sentences": 3000,
+  "num_tokens": 85678,
+  "num_gold_entities": 11735,
+  "num_pred_entities": 11404,
+  "overall": {
+    "micro": {
+      "precision": 0.9161697649947387,
+      "recall": 0.8903280783979548,
+      "f1": 0.9030640909287351,
+      "support": 11735
+    },
+    "macro": {
+      "precision": 0.8530659759335171,
+      "recall": 0.8878916527239316,
+      "f1": 0.8678477615215119,
+      "support": 11735
+    },
+    "weighted": {
+      "precision": 0.919884837317475,
+      "recall": 0.8903280783979548,
+      "f1": 0.9040168650472471,
+      "support": 11735
+    }
+  },
+  "per_entity": {
+    "AGE": {
+      "precision": 0.8752166377816292,
+      "recall": 0.8676975945017182,
+      "f1": 0.8714408973252803,
+      "support": 582
+    },
+    "DATE": {
+      "precision": 0.9267822736030829,
+      "recall": 0.8724304715840387,
+      "f1": 0.8987854251012145,
+      "support": 1654
+    },
+    "GENDER": {
+      "precision": 0.8376753507014028,
+      "recall": 0.9047619047619048,
+      "f1": 0.8699271592091571,
+      "support": 462
+    },
+    "JOB": {
+      "precision": 0.7122641509433962,
+      "recall": 0.8728323699421965,
+      "f1": 0.7844155844155843,
+      "support": 173
+    },
+    "LOCATION": {
+      "precision": 0.9572153734590283,
+      "recall": 0.8916910605719433,
+      "f1": 0.9232921426906039,
+      "support": 4441
+    },
+    "NAME": {
+      "precision": 0.7880434782608695,
+      "recall": 0.9119496855345912,
+      "f1": 0.8454810495626821,
+      "support": 318
+    },
+    "ORGANIZATION": {
+      "precision": 0.8917525773195877,
+      "recall": 0.8975356679636836,
+      "f1": 0.8946347769877182,
+      "support": 771
+    },
+    "PATIENT_ID": {
+      "precision": 0.9396775871034841,
+      "recall": 0.9012468827930175,
+      "f1": 0.9200610997963341,
+      "support": 2005
+    },
+    "SYMPTOM_AND_DISEASE": {
+      "precision": 0.9119496855345912,
+      "recall": 0.8934859154929577,
+      "f1": 0.9026233881725212,
+      "support": 1136
+    },
+    "TRANSPORTATION": {
+      "precision": 0.6900826446280992,
+      "recall": 0.8652849740932642,
+      "f1": 0.767816091954023,
+      "support": 193
+    }
+  },
+  "bio_violations": {
+    "pred": {
+      "total": 137,
+      "by_type": {
+        "AGE": 9,
+        "DATE": 19,
+        "GENDER": 3,
+        "JOB": 4,
+        "LOCATION": 45,
+        "NAME": 6,
+        "ORGANIZATION": 16,
+        "PATIENT_ID": 21,
+        "SYMPTOM_AND_DISEASE": 11,
+        "TRANSPORTATION": 3
+      },
+      "sentences_with_violation": 134,
+      "num_tokens": 85678,
+      "per_1k_tokens": 1.599
+    },
+    "gold": {
+      "total": 0,
+      "by_type": {
+        "AGE": 0,
+        "DATE": 0,
+        "GENDER": 0,
+        "JOB": 0,
+        "LOCATION": 0,
+        "NAME": 0,
+        "ORGANIZATION": 0,
+        "PATIENT_ID": 0,
+        "SYMPTOM_AND_DISEASE": 0,
+        "TRANSPORTATION": 0
+      },
+      "sentences_with_violation": 0,
+      "num_tokens": 85678,
+      "per_1k_tokens": 0.0
+    }
+  },
+  "config": {},
+  "extra": {},
+  "created_at": "2026-11-19T17:59:42+07:00"
+}

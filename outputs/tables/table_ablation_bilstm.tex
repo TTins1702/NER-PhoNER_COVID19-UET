@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcccc}
+\hline
+\textbf{Cấu hình} & \textbf{Micro-F1} & \textbf{Macro-F1} & \textbf{$\Delta$F1} & \textbf{Lỗi BIO} \\
+\hline
+BiLSTM + CharCNN + CRF (Đầy đủ) & [CHỜ SỐ LIỆU: BiLSTM + CharCNN + CRF (Đầy đủ) Micro-F1] & [CHỜ SỐ LIỆU: BiLSTM + CharCNN + CRF (Đầy đủ) Macro-F1] & — & [CHỜ SỐ LIỆU: BiLSTM + CharCNN + CRF (Đầy đủ) BIO] \\
+  \$-\$ Character Embedding (BiLSTM + CRF) & [CHỜ SỐ LIỆU:   \$-\$ Character Embedding (BiLSTM + CRF) Micro-F1] & [CHỜ SỐ LIỆU:   \$-\$ Character Embedding (BiLSTM + CRF) Macro-F1] & — & [CHỜ SỐ LIỆU:   \$-\$ Character Embedding (BiLSTM + CRF) BIO] \\
+  \$-\$ Tầng CRF (BiLSTM + CharCNN + Softmax) & [CHỜ SỐ LIỆU:   \$-\$ Tầng CRF (BiLSTM + CharCNN + Softmax) Micro-F1] & [CHỜ SỐ LIỆU:   \$-\$ Tầng CRF (BiLSTM + CharCNN + Softmax) Macro-F1] & — & [CHỜ SỐ LIỆU:   \$-\$ Tầng CRF (BiLSTM + CharCNN + Softmax) BIO] \\
+\hline
+\end{tabular}
+\caption{Ablation Study cho mô hình BiLSTM-CRF tự cài đặt.}
+\label{tab:ablation_bilstm}
+\end{table}

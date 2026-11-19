@@ -1,0 +1,147 @@
+% milestone_report.tex — Báo cáo Giữa kỳ (Milestone Report — tối đa 4 trang chuẩn ACL)
+% Biên dịch bằng XeLaTeX hoặc LuaLaTeX:
+%   xelatex milestone_report.tex && bibtex milestone_report && xelatex milestone_report.tex && xelatex milestone_report.tex
+
+\documentclass[11pt,a4paper,twocolumn]{article}
+\usepackage[final]{acl_uet}
+
+\title{Báo cáo Giữa kỳ (Milestone Report): Tiến độ Cài đặt và Kết quả Baseline\\
+Bài toán NER Tiếng Việt trên \texttt{PhoNER\_COVID19}}
+
+\author{
+  Đạt (\texttt{[CHỜ SỐ LIỆU: MSSV Đạt]}) \quad
+  Tín (\texttt{[CHỜ SỐ LIỆU: MSSV Tín]}) \quad
+  Đức Anh (\texttt{[CHỜ SỐ LIỆU: MSSV Đức Anh]}) \\
+  Khoa Công nghệ Thông tin, Trường Đại học Công nghệ — ĐHQGHN (UET-VNU) \\
+  \texttt{\{dat, tin, ducanh\}@vnu.edu.vn}
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+% =============================================================================
+\section{Tóm tắt Tiến độ Hoàn thành đến Giữa kỳ}
+Đến cột mốc giữa kỳ (Tuần 3), nhóm đã hoàn thành kiến trúc mã nguồn mô-đun hóa (\texttt{src/}) tách biệt khỏi môi trường chạy đám mây (\texttt{notebooks/}), thiết lập Hợp đồng giao diện thống nhất (\texttt{docs/interface\_contract.md}) và hoàn tất $100\%$ hạ tầng dữ liệu, kiểm thử đơn vị và bộ chấm điểm:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{2.6cm}p{1.2cm}p{3.1cm}}
+\hline
+\textbf{Hạng mục} & \textbf{Phụ trách} & \textbf{Trạng thái} \\
+\hline
+Tải \& kiểm tra dữ liệu (\texttt{download.py}, \texttt{labels.py}) & Đạt & \textbf{Hoàn thành (100\%)} — Đã kiểm chứng trên $6$ tập word/syllable. \\
+\hline
+Từ điển \& Dataset BiLSTM (\texttt{vocab.py}, \texttt{bilstm\_dataset.py}) & Đạt & \textbf{Hoàn thành (100\%)} — Đã có unit test kiểm tra shape \& mask. \\
+\hline
+Phân tích dữ liệu EDA (\texttt{01\_eda\_data\_stats.ipynb}) & Đạt & \textbf{Hoàn thành (100\%)} — Xuất đủ biểu đồ thang xám và bảng OOV. \\
+\hline
+Bộ chấm điểm chuẩn \& Phân tích lỗi (\texttt{metrics.py}, \texttt{error\_analysis.py}) & Đạt & \textbf{Hoàn thành (100\%)} — Khớp tuyệt đối với \texttt{seqeval} strict IOB2. \\
+\hline
+Mô hình \texttt{BiLSTM-CRF} tự cài từ đầu (\texttt{crf.py}, \texttt{bilstm\_crf.py}) & Tín & \texttt{[CHỜ SỐ LIỆU: Tiến độ BiLSTM-CRF của Tín]} \\
+\hline
+Tinh chỉnh \texttt{PhoBERT} (\texttt{phobert\_dataset.py}, \texttt{phobert\_ner.py}) & Đức Anh & \texttt{[CHỜ SỐ LIỆU: Tiến độ PhoBERT của Đức Anh]} \\
+\hline
+\end{tabular}
+\caption{Tiến độ chi tiết các phân hệ kỹ thuật của nhóm tại cột mốc Milestone.}
+\label{tab:ms_progress}
+\end{table}
+
+% =============================================================================
+\section{Thiết lập Thí nghiệm và Kết quả Baseline}
+
+\subsection{Quy chuẩn Tiền xử lý và Chấm điểm Dùng chung}
+Toàn bộ thí nghiệm baseline chạy trên tập dữ liệu mức từ (\texttt{data/word/}) của \texttt{PhoNER\_COVID19} \citep{truong-etal-2021-covid} gồm $5.027$ câu huấn luyện ($132.511$ từ, $15.767$ thực thể), $2.000$ câu validation ($56.283$ từ, $7.478$ thực thể) và $3.000$ câu kiểm thử ($85.678$ từ, $11.735$ thực thể). Từ điển từ \texttt{WordVocab} được xây dựng nghiêm ngặt chỉ từ tập \texttt{train} ($5.169$ từ với $\text{\texttt{min\_freq}}=1$; $3.274$ từ với $\text{\texttt{min\_freq}}=2$).
+
+Mọi dự đoán của cả hai nhánh mô hình đều được xuất ra định dạng chuẩn \texttt{outputs/predictions/<exp>\_<split>.jsonl} với chuỗi nhãn dự đoán có độ dài bằng đúng $\text{len}(\text{\texttt{words}})$ của câu gốc, sau đó chấm điểm bằng \texttt{src/evaluation/metrics.py} (\texttt{seqeval}, \texttt{mode="strict", scheme=IOB2}).
+
+\subsection{Kết quả Thực nghiệm Baseline}
+Bảng~\ref{tab:ms_baseline} và Bảng~\ref{tab:ms_per_entity} tổng hợp kết quả của các mô hình baseline trên tập \texttt{dev\_word} và \texttt{test\_word}, cùng số lượng lỗi vi phạm ràng buộc BIO ($\text{BIO-Viol}$, tức nhãn \texttt{I-}$c$ không có \texttt{B-}$c$ đứng trước):
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{llccccc}
+\hline
+\textbf{Mô hình Baseline} & \textbf{Tập} & \textbf{Micro-P (\%)} & \textbf{Micro-R (\%)} & \textbf{Micro-F1 (\%)} & \textbf{Macro-F1 (\%)} & \textbf{Vi phạm BIO} \\
+\hline
+\texttt{BiLSTM + Softmax} (Chưa có CRF/Char) & \texttt{dev} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Dev P]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Dev R]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Dev F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Dev Macro-F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Dev BIO]} \\
+\texttt{BiLSTM + CharCNN + CRF} (Tự cài từ đầu) & \texttt{dev} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Dev P]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Dev R]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Dev F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Dev Macro-F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Dev BIO]} \\
+\texttt{PhoBERT-base-v2 + Linear Softmax} & \texttt{dev} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Dev P]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Dev R]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Dev F1]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Dev Macro-F1]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Dev BIO]} \\
+\hline
+\texttt{BiLSTM + Softmax} (Chưa có CRF/Char) & \texttt{test} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Test P]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Test R]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Test F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Test Macro-F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-Softmax Test BIO]} \\
+\texttt{BiLSTM + CharCNN + CRF} (Tự cài từ đầu) & \texttt{test} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Test P]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Test R]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Test F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Test Macro-F1]} & \texttt{[CHỜ SỐ LIỆU: BiLSTM-CRF Test BIO]} \\
+\texttt{PhoBERT-base-v2 + Linear Softmax} & \texttt{test} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Test P]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Test R]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Test F1]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Test Macro-F1]} & \texttt{[CHỜ SỐ LIỆU: PhoBERT Test BIO]} \\
+\hline
+\end{tabular}
+\caption{Kết quả baseline tổng thể trên tập \texttt{dev\_word} và \texttt{test\_word} (chấm bằng \texttt{seqeval} strict IOB2).}
+\label{tab:ms_baseline}
+\end{table*}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lrcc}
+\hline
+\textbf{Loại thực thể} & \textbf{Support} & \textbf{BiLSTM-CRF} & \textbf{PhoBERT} \\
+\hline
+\texttt{AGE}                   & $582$   & \texttt{[CHỜ SỐ LIỆU: F1 AGE BiLSTM]}   & \texttt{[CHỜ SỐ LIỆU: F1 AGE PhoBERT]}   \\
+\texttt{DATE}                  & $1.654$ & \texttt{[CHỜ SỐ LIỆU: F1 DATE BiLSTM]}  & \texttt{[CHỜ SỐ LIỆU: F1 DATE PhoBERT]}  \\
+\texttt{GENDER}                & $462$   & \texttt{[CHỜ SỐ LIỆU: F1 GEN BiLSTM]}   & \texttt{[CHỜ SỐ LIỆU: F1 GEN PhoBERT]}   \\
+\texttt{OCCUPATION} (\texttt{JOB}) & $173$ & \texttt{[CHỜ SỐ LIỆU: F1 JOB BiLSTM]} & \texttt{[CHỜ SỐ LIỆU: F1 JOB PhoBERT]}   \\
+\texttt{LOCATION}              & $4.441$ & \texttt{[CHỜ SỐ LIỆU: F1 LOC BiLSTM]}   & \texttt{[CHỜ SỐ LIỆU: F1 LOC PhoBERT]}   \\
+\texttt{PERSON\_NAME} (\texttt{NAME}) & $318$ & \texttt{[CHỜ SỐ LIỆU: F1 NAME BiLSTM]} & \texttt{[CHỜ SỐ LIỆU: F1 NAME PhoBERT]} \\
+\texttt{ORGANIZATION}          & $771$   & \texttt{[CHỜ SỐ LIỆU: F1 ORG BiLSTM]}   & \texttt{[CHỜ SỐ LIỆU: F1 ORG PhoBERT]}   \\
+\texttt{PATIENT\_ID}           & $2.005$ & \texttt{[CHỜ SỐ LIỆU: F1 PID BiLSTM]}   & \texttt{[CHỜ SỐ LIỆU: F1 PID PhoBERT]}   \\
+\texttt{SYMPTOM\_AND\_DISEASE} & $1.136$ & \texttt{[CHỜ SỐ LIỆU: F1 SYM BiLSTM]}   & \texttt{[CHỜ SỐ LIỆU: F1 SYM PhoBERT]}   \\
+\texttt{TRANSPORTATION}        & $193$   & \texttt{[CHỜ SỐ LIỆU: F1 TRANS BiLSTM]} & \texttt{[CHỜ SỐ LIỆU: F1 TRANS PhoBERT]} \\
+\hline
+\end{tabular}
+\caption{Điểm F1 (\%) theo từng loại thực thể của hai phương pháp chính trên tập \texttt{test\_word}.}
+\label{tab:ms_per_entity}
+\end{table}
+
+% =============================================================================
+\section{Khó khăn Kỹ thuật Đã Gặp và Hướng Giải quyết}
+Trong quá trình xây dựng pipeline dữ liệu, tự cài đặt mô hình và thiết lập đánh giá, nhóm đã giải quyết bốn vấn đề kỹ thuật trọng tâm:
+
+\paragraph{1. Xử lý mặt nạ (\textit{masking}) và giá trị đệm (\textit{padding}) giữa CrossEntropy và CRF.}
+Khi huấn luyện với \texttt{nn.CrossEntropyLoss}, các vị trí đệm thường được gán nhãn $\text{\texttt{ignore\_index}} = -100$. Tuy nhiên, trong tầng \texttt{Linear-chain CRF} tự cài đặt, thuật toán tính điểm chuỗi thật $s(\mathbf{x}, \mathbf{y})$ cần dùng chỉ số nhãn $y_t$ để truy xuất mảng (\texttt{torch.gather}) trên ma trận phát xạ và ma trận chuyển trạng thái; nếu $\text{\texttt{tags}}$ chứa giá trị âm $-100$ sẽ gây lỗi truy cập bộ nhớ trên GPU (\textit{CUDA device-side assert}).
+\textit{Giải pháp:} Trong \texttt{bilstm\_collate\_fn}, vị trí đệm của $\text{\texttt{tags}}$ được gán bằng $\text{\texttt{O\_ID}} = 0$ (một chỉ số hợp lệ), đồng thời truyền kèm tensor $\text{\texttt{mask}} \in \{\text{\texttt{True}}, \text{\texttt{False}}\}^{B \times L}$ để nhân triệt tiêu phần điểm phát xạ/chuyển trạng thái tại các bước thời gian đệm.
+
+\paragraph{2. Lệch số lượng token khi bộ tách BPE của PhoBERT bẻ từ ghép.}
+Bộ BPE tokenizer của \texttt{vinai/phobert-base-v2} \citep{nguyen-nguyen-2020-phobert} tách nhiều từ hiếm hoặc địa danh ghép thành nhiều subword. Nếu chấm điểm trực tiếp trên chuỗi subword, số lượng token sẽ khác với \texttt{BiLSTM-CRF} và một thực thể bị tách nhiều subword sẽ bị tính sai trọng số.
+\textit{Giải pháp:} Áp dụng quy tắc \textit{First-Subword Alignment} và kiểm tra cưỡng bức bằng hàm \texttt{check\_alignment} trong \texttt{src/evaluation/predictions.py}: chuỗi nhãn dự đoán cuối cùng của mọi mô hình bắt buộc phải có độ dài bằng đúng $\text{len}(\text{\texttt{words}})$ của câu gốc trước khi đưa vào \texttt{seqeval}.
+
+\paragraph{3. Khác biệt giữa chế độ đánh giá \texttt{strict} và mặc định trong \texttt{seqeval}.}
+Khi kiểm thử với dữ liệu giả lập có chứa lỗi vi phạm BIO (ví dụ chuỗi dự đoán \texttt{[I-AGE, I-AGE]} không có \texttt{B-AGE} mở đầu), nhóm phát hiện chế độ mặc định của \texttt{seqeval} tự động coi nhãn \texttt{I-AGE} đầu tiên như một thực thể mới và chấm $\text{F1} = 1{,}0$. Điều này làm lu mờ hoàn toàn tác dụng học ràng buộc chuyển nhãn của tầng CRF.
+\textit{Giải pháp:} Cố định tham số \texttt{mode="strict", scheme=IOB2} trong \texttt{src/evaluation/metrics.py}, đồng thời viết thêm hàm \texttt{count\_bio\_violations} và \texttt{repair\_bio} để định lượng tường minh số lỗi BIO trong mục Analysis.
+
+\paragraph{4. Xung đột Git khi ba thành viên cùng làm việc trên Kaggle/Colab.}
+File Jupyter Notebook (\texttt{.ipynb}) lưu kèm metadata và ảnh đầu ra dạng base64 rất dễ gây xung đột khi merge.
+\textit{Giải pháp:} Đóng gói toàn bộ logic vào các module Python độc lập trong \texttt{src/}, còn notebook chỉ đóng vai trò trạm gọi lệnh mỏng (\textit{thin runner}) và mỗi thành viên phát triển trên nhánh Git riêng trước khi tạo Pull Request.
+
+% =============================================================================
+\section{Kế hoạch Thực hiện Giai đoạn Còn lại (Tuần 4 -- Tuần 6)}
+\begin{enumerate}
+  \item \textbf{Tuần 4 (Ablation Study \& Tinh chỉnh siêu tham số):}
+    \begin{itemize}
+      \item Nhánh \texttt{BiLSTM-CRF} (Tín): Hoàn tất 3 cấu hình ablation (\texttt{BiLSTM+Softmax}, \texttt{BiLSTM+CRF} không CharCNN, \texttt{BiLSTM+CharCNN+CRF} đầy đủ) và khảo sát ảnh hưởng của $\text{\texttt{min\_freq}} \in \{1, 2\}$, $\text{\texttt{dropout}} \in \{0{,}3, 0{,}5\}$.
+      \item Nhánh \texttt{PhoBERT} (Đức Anh): Hoàn tất 4 cấu hình ablation (Freeze vs. Full fine-tune; Last-layer vs. Concat-4-layers; Softmax head vs. CRF head).
+      \item Tổng hợp tự động (Đạt): Chạy \texttt{scripts/export\_latex\_tables.py} sinh toàn bộ bảng LaTeX từ file JSON kết quả.
+    \end{itemize}
+  \item \textbf{Tuần 5 (Phân tích lỗi chuyên sâu, Trực quan hóa \& Demo):}
+    \begin{itemize}
+      \item Chạy \texttt{notebooks/04\_error\_analysis.ipynb} trên file dự đoán thật để xuất ma trận nhầm lẫn, biểu đồ phân rã $4$ nhóm lỗi, độ phủ theo độ dài thực thể/OOV và trích xuất bảng ví dụ câu đúng/sai điển hình.
+      \item Cắm checkpoint tốt nhất vào ứng dụng Demo Gradio (\texttt{app/demo.py}) qua hàm \texttt{load\_model(path)}.
+    \end{itemize}
+  \item \textbf{Tuần 6 (Hoàn thiện Báo cáo ACL 8 trang, Slide \& Vấn đáp):}
+    \begin{itemize}
+      \item Điền toàn bộ số liệu thực nghiệm vào \texttt{report/final\_report.tex}, kiểm tra quy chuẩn ACL (khổ A4, font Times, thang xám, giới hạn 8 trang) và tổ chức ôn tập chéo toàn bộ mã nguồn để chuẩn bị bảo vệ vấn đáp cá nhân.
+    \end{itemize}
+\end{enumerate}
+
+\bibliography{references}
+\end{document}
