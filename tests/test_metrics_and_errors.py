@@ -24,7 +24,7 @@ from src.evaluation.metrics import (
     SCHEMA_VERSION,
     build_result,
     compute_metrics,
-    count_bio_violations,
+    bio_violation_stats,
     evaluate_and_save,
     find_bio_violations,
     load_metrics_json,
@@ -39,7 +39,7 @@ def test_bio_violations_and_strict_iob2_scoring() -> None:
     y_pred = [["I-LOCATION", "I-LOCATION", "O", "I-DATE"]]
 
     assert find_bio_violations(y_pred[0]) == [0, 3]
-    v = count_bio_violations(y_pred)
+    v = bio_violation_stats(y_pred)
     assert v["total"] == 2
     assert v["by_type"]["LOCATION"] == 1
     assert v["by_type"]["DATE"] == 1

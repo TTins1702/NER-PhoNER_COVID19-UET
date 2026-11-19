@@ -54,7 +54,7 @@ def find_bio_violations(tags: Sequence[str]) -> list[int]:
     return positions
 
 
-def count_bio_violations(sequences: Sequence[Sequence[str]]) -> dict[str, Any]:
+def bio_violation_stats(sequences: Sequence[Sequence[str]]) -> dict[str, Any]:
     """Thống kê vi phạm BIO trên cả tập.
 
     Trả về: total (số nhãn vi phạm), by_type (theo loại X của I-X), sentences_with_violation,
@@ -141,9 +141,34 @@ def compute_metrics(y_true: Sequence[Sequence[str]], y_pred: Sequence[Sequence[s
         "num_pred_entities": sum(len(extract_entities(s)) for s in y_pred_eval),
         "overall": overall,
         "per_entity": per_entity,
-        "bio_violations": {"pred": count_bio_violations(raw_pred), "gold": count_bio_violations(y_true)},
+        "bio_violations": {"pred": bio_violation_stats(raw_pred), "gold": bio_violation_stats(y_true)},
     }
 
+
+def count_bio_violations(tag_sequences: Sequence[Sequence[str]]) -> int:
+    """Tổng số nhãn `I-X` vi phạm IOB2, trả về số nguyên (cùng giao diện với code của Tín).
+
+    Bản chi tiết (theo loại, theo câu, trên 1k token) là `bio_violation_stats`.
+    """
+    return int(bio_violation_stats(tag_sequences)["total"])
+
+
+def compute_ner_metrics(y_true: Sequence[Sequence[str]], y_pred: Sequence[Sequence[str]]) -> dict[str, Any]:
+    """Bản rút gọn của `compute_metrics` với khóa phẳng mà `Trainer` của Tín cần.
+
+    Trả về: micro_precision, micro_recall, micro_f1, macro_f1, per_entity
+    ({loại: {precision, recall, f1, support}}), bio_violations (số nguyên, tính trên y_pred).
+    """
+    r = compute_metrics(y_true, y_pred)
+    overall = r["overall"]
+    return {
+        "micro_precision": overall["micro"]["precision"],
+        "micro_recall": overall["micro"]["recall"],
+        "micro_f1": overall["micro"]["f1"],
+        "macro_f1": overall["macro"]["f1"],
+        "per_entity": r["per_entity"],
+        "bio_violations": r["bio_violations"]["pred"]["total"],
+    }
 
 def build_result(y_true: Sequence[Sequence[str]], y_pred: Sequence[Sequence[str]], experiment_name: str,
                  model: str, split: str, level: str = "word", group: str = "main",
