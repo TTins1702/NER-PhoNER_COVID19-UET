@@ -153,3 +153,7 @@ def build_bilstm_dataloaders(
             generator=gen,
         )
     return loaders, word_vocab, char_vocab
+
+
+# --- Tên tương thích với code của Tín ---
+BiLSTMDataset = BiLSTMNERDataset

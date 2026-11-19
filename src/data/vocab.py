@@ -242,3 +242,8 @@ class CharVocab:
     @classmethod
     def load(cls, path: Path | str) -> "CharVocab":
         return cls.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
+
+
+# --- Tên tương thích với code của Tín ---
+PAD_IDX = PAD_ID
+UNK_IDX = UNK_ID

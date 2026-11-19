@@ -130,3 +130,8 @@ def extract_entities(tags: Sequence[str]) -> list[tuple[str, int, int]]:
     if cur_type is not None:
         entities.append((cur_type, cur_start, len(tags)))
     return entities
+
+
+# --- Tên tương thích với code của Tín (chỉ thêm, không đổi tên cũ) ---
+IGNORE_INDEX: int = -100  # nhãn "bỏ qua" khi tính loss (Tín dùng); BiLSTMNERDataset của Đạt vẫn pad nhãn bằng O_ID
+decode_tags = decode_ids  # tên Tín gọi cho decode_ids
