@@ -134,4 +134,6 @@ def extract_entities(tags: Sequence[str]) -> list[tuple[str, int, int]]:
 
 # --- Tên tương thích với code của Tín (chỉ thêm, không đổi tên cũ) ---
 IGNORE_INDEX: int = -100  # nhãn "bỏ qua" khi tính loss (Tín dùng); BiLSTMNERDataset của Đạt vẫn pad nhãn bằng O_ID
-decode_tags = decode_ids  # tên Tín gọi cho decode_ids
+def decode_tags(ids: Sequence[int]) -> list[str]:
+    """Giải mã id -> nhãn, **bỏ qua** vị trí đệm `IGNORE_INDEX` (-100). Khớp giao diện của Tín."""
+    return [ID2LABEL[int(i)] for i in ids if int(i) != IGNORE_INDEX]
