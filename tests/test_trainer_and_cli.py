@@ -80,6 +80,11 @@ def test_notebooks_are_valid_json() -> None:
     nb03_text = (Path("notebooks") / "03_train_phobert.ipynb").read_text(encoding="utf-8")
     assert "NER-PhoNER_COVID19-UET" in nb03_text
     assert "tin-bilstm-crf" in nb03_text
+    for nb_text in (nb02_text, nb03_text):
+        assert 'Path(\\"../src\\")' not in nb_text
+        assert 'Path(\\"src\\")' not in nb_text
+        assert "_is_repo_root" in nb_text
+        assert "scripts" in nb_text and "train.py" in nb_text
 
 
 def test_cli_scripts_run_as_subprocess_without_pythonpath() -> None:
