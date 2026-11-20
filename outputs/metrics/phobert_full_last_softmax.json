@@ -1,0 +1,215 @@
+{
+  "experiment_name": "phobert_full_last_softmax",
+  "best_epoch": 3,
+  "best_dev_f1": 0.957597645799893,
+  "checkpoint_path": "checkpoints/phobert/phobert_full_last_softmax/best_model.pt",
+  "history": [
+    {
+      "epoch": 1.0,
+      "train_loss": 0.5797246727767208,
+      "dev_micro_f1": 0.9382272757497174,
+      "dev_macro_f1": 0.8912637744687177,
+      "dev_bio_violations": 157.0
+    },
+    {
+      "epoch": 2.0,
+      "train_loss": 0.04157107681154259,
+      "dev_micro_f1": 0.9549092849519744,
+      "dev_macro_f1": 0.9362235103533552,
+      "dev_bio_violations": 94.0
+    },
+    {
+      "epoch": 3.0,
+      "train_loss": 0.0249544585474752,
+      "dev_micro_f1": 0.957597645799893,
+      "dev_macro_f1": 0.9400052001140095,
+      "dev_bio_violations": 66.0
+    },
+    {
+      "epoch": 4.0,
+      "train_loss": 0.018055034436226365,
+      "dev_micro_f1": 0.9575757575757575,
+      "dev_macro_f1": 0.9465889342655409,
+      "dev_bio_violations": 59.0
+    },
+    {
+      "epoch": 5.0,
+      "train_loss": 0.01356466852741996,
+      "dev_micro_f1": 0.9573757349011225,
+      "dev_macro_f1": 0.9460068516822433,
+      "dev_bio_violations": 69.0
+    }
+  ],
+  "dev": {
+    "micro_precision": 0.9578538934974579,
+    "micro_recall": 0.9573415351698316,
+    "micro_f1": 0.957597645799893,
+    "macro_f1": 0.9400052001140095,
+    "per_entity": {
+      "AGE": {
+        "precision": 0.9805555555555555,
+        "recall": 0.9778393351800554,
+        "f1": 0.9791955617198337,
+        "support": 361
+      },
+      "DATE": {
+        "precision": 0.9846984698469847,
+        "recall": 0.9918404351767905,
+        "f1": 0.9882565492321591,
+        "support": 1103
+      },
+      "GENDER": {
+        "precision": 0.9636363636363636,
+        "recall": 0.9566787003610109,
+        "f1": 0.9601449275362319,
+        "support": 277
+      },
+      "JOB": {
+        "precision": 0.8761904761904762,
+        "recall": 0.696969696969697,
+        "f1": 0.7763713080168777,
+        "support": 132
+      },
+      "LOCATION": {
+        "precision": 0.9644558446317333,
+        "recall": 0.9616368286445013,
+        "f1": 0.9630442736919138,
+        "support": 2737
+      },
+      "NAME": {
+        "precision": 0.9361702127659575,
+        "recall": 0.9361702127659575,
+        "f1": 0.9361702127659575,
+        "support": 188
+      },
+      "ORGANIZATION": {
+        "precision": 0.9115523465703971,
+        "recall": 0.9165154264972777,
+        "f1": 0.914027149321267,
+        "support": 551
+      },
+      "PATIENT_ID": {
+        "precision": 0.9889589905362776,
+        "recall": 0.9827586206896551,
+        "f1": 0.9858490566037736,
+        "support": 1276
+      },
+      "SYMPTOM_AND_DISEASE": {
+        "precision": 0.8795483061480552,
+        "recall": 0.9151436031331592,
+        "f1": 0.8969929622520793,
+        "support": 766
+      },
+      "TRANSPORTATION": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 87
+      }
+    },
+    "bio_violations": 66
+  },
+  "test": {
+    "micro_precision": 0.9492446104226787,
+    "micro_recall": 0.9530464422667235,
+    "micro_f1": 0.9511417272611304,
+    "macro_f1": 0.9327999808102214,
+    "per_entity": {
+      "AGE": {
+        "precision": 0.9673539518900344,
+        "recall": 0.9673539518900344,
+        "f1": 0.9673539518900344,
+        "support": 582
+      },
+      "DATE": {
+        "precision": 0.9879227053140096,
+        "recall": 0.9891172914147521,
+        "f1": 0.9885196374622357,
+        "support": 1654
+      },
+      "GENDER": {
+        "precision": 0.9739130434782609,
+        "recall": 0.9696969696969697,
+        "f1": 0.9718004338394793,
+        "support": 462
+      },
+      "JOB": {
+        "precision": 0.8258064516129032,
+        "recall": 0.7398843930635838,
+        "f1": 0.7804878048780488,
+        "support": 173
+      },
+      "LOCATION": {
+        "precision": 0.9478747203579418,
+        "recall": 0.9540643999099302,
+        "f1": 0.9509594882729211,
+        "support": 4441
+      },
+      "NAME": {
+        "precision": 0.934984520123839,
+        "recall": 0.949685534591195,
+        "f1": 0.9422776911076444,
+        "support": 318
+      },
+      "ORGANIZATION": {
+        "precision": 0.8793324775353016,
+        "recall": 0.8884565499351491,
+        "f1": 0.8838709677419353,
+        "support": 771
+      },
+      "PATIENT_ID": {
+        "precision": 0.9790836653386454,
+        "recall": 0.9805486284289276,
+        "f1": 0.9798155993022677,
+        "support": 2005
+      },
+      "SYMPTOM_AND_DISEASE": {
+        "precision": 0.8936905790838375,
+        "recall": 0.9102112676056338,
+        "f1": 0.9018752725686873,
+        "support": 1136
+      },
+      "TRANSPORTATION": {
+        "precision": 0.9635416666666666,
+        "recall": 0.9585492227979274,
+        "f1": 0.961038961038961,
+        "support": 193
+      }
+    },
+    "bio_violations": 112
+  },
+  "config": {
+    "experiment_name": "phobert_full_last_softmax",
+    "seed": 42,
+    "data": {
+      "level": "word",
+      "data_dir": "data",
+      "max_seq_length": 256
+    },
+    "model": {
+      "name": "phobert",
+      "pretrained_name": "vinai/phobert-base-v2",
+      "feature_mode": "last_layer",
+      "use_crf": false,
+      "freeze_backbone": false,
+      "dropout": 0.1
+    },
+    "training": {
+      "batch_size": 16,
+      "epochs": 5,
+      "backbone_lr": 2e-05,
+      "head_lr": 0.001,
+      "weight_decay": 0.01,
+      "warmup_ratio": 0.1,
+      "grad_clip": 1.0,
+      "patience": 3,
+      "checkpoint_dir": "checkpoints/phobert/phobert_full_last_softmax"
+    },
+    "logging": {
+      "use_wandb": true,
+      "wandb_entity": "NER-UET",
+      "wandb_project": "ner-phoner-covid19-uet",
+      "output_dir": "outputs/metrics"
+    }
+  }
+}

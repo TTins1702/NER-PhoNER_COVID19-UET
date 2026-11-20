@@ -1,0 +1,394 @@
+{
+  "experiment_name": "bilstm_crf_nochar_word",
+  "best_epoch": 26,
+  "best_dev_f1": 0.9172708178060844,
+  "checkpoint_path": "checkpoints/bilstm_crf_nochar/best_model.pt",
+  "history": [
+    {
+      "epoch": 1.0,
+      "train_loss": 20.58519351935085,
+      "dev_micro_f1": 0.6884452510586813,
+      "dev_macro_f1": 0.5072069913690294,
+      "dev_bio_violations": 352.0
+    },
+    {
+      "epoch": 2.0,
+      "train_loss": 7.569310511214824,
+      "dev_micro_f1": 0.7840761575075725,
+      "dev_macro_f1": 0.6264391342304443,
+      "dev_bio_violations": 203.0
+    },
+    {
+      "epoch": 3.0,
+      "train_loss": 5.344226915625077,
+      "dev_micro_f1": 0.8163968308646229,
+      "dev_macro_f1": 0.6891234814595395,
+      "dev_bio_violations": 164.0
+    },
+    {
+      "epoch": 4.0,
+      "train_loss": 4.224265444127819,
+      "dev_micro_f1": 0.8407548194406733,
+      "dev_macro_f1": 0.7251882146542252,
+      "dev_bio_violations": 123.0
+    },
+    {
+      "epoch": 5.0,
+      "train_loss": 3.4881865797163565,
+      "dev_micro_f1": 0.858802079816328,
+      "dev_macro_f1": 0.7751623082362287,
+      "dev_bio_violations": 89.0
+    },
+    {
+      "epoch": 6.0,
+      "train_loss": 3.0388951656184617,
+      "dev_micro_f1": 0.8720568942898571,
+      "dev_macro_f1": 0.7993864087880871,
+      "dev_bio_violations": 63.0
+    },
+    {
+      "epoch": 7.0,
+      "train_loss": 2.58363000727907,
+      "dev_micro_f1": 0.8774220145664422,
+      "dev_macro_f1": 0.8085217072465785,
+      "dev_bio_violations": 60.0
+    },
+    {
+      "epoch": 8.0,
+      "train_loss": 2.3167710830516453,
+      "dev_micro_f1": 0.8867975626269465,
+      "dev_macro_f1": 0.8291464720153238,
+      "dev_bio_violations": 60.0
+    },
+    {
+      "epoch": 9.0,
+      "train_loss": 2.107305897942072,
+      "dev_micro_f1": 0.8916814642808358,
+      "dev_macro_f1": 0.8403923456541771,
+      "dev_bio_violations": 34.0
+    },
+    {
+      "epoch": 10.0,
+      "train_loss": 1.9363720077502578,
+      "dev_micro_f1": 0.8946135831381733,
+      "dev_macro_f1": 0.8486084560611328,
+      "dev_bio_violations": 22.0
+    },
+    {
+      "epoch": 11.0,
+      "train_loss": 1.7269933427436441,
+      "dev_micro_f1": 0.8945028294260307,
+      "dev_macro_f1": 0.8487496417047596,
+      "dev_bio_violations": 34.0
+    },
+    {
+      "epoch": 12.0,
+      "train_loss": 1.5636192560195923,
+      "dev_micro_f1": 0.9006977992485239,
+      "dev_macro_f1": 0.8580929541346227,
+      "dev_bio_violations": 40.0
+    },
+    {
+      "epoch": 13.0,
+      "train_loss": 1.4345848703686195,
+      "dev_micro_f1": 0.9036217710932757,
+      "dev_macro_f1": 0.8567454426811384,
+      "dev_bio_violations": 19.0
+    },
+    {
+      "epoch": 14.0,
+      "train_loss": 1.315169169932981,
+      "dev_micro_f1": 0.9034976258944692,
+      "dev_macro_f1": 0.8635941484015535,
+      "dev_bio_violations": 25.0
+    },
+    {
+      "epoch": 15.0,
+      "train_loss": 1.2081557902259916,
+      "dev_micro_f1": 0.9075710207965203,
+      "dev_macro_f1": 0.8651986457979921,
+      "dev_bio_violations": 18.0
+    },
+    {
+      "epoch": 16.0,
+      "train_loss": 1.1190886452228208,
+      "dev_micro_f1": 0.9073118423698144,
+      "dev_macro_f1": 0.8688056761674112,
+      "dev_bio_violations": 30.0
+    },
+    {
+      "epoch": 17.0,
+      "train_loss": 1.0911507005744343,
+      "dev_micro_f1": 0.9085775746168324,
+      "dev_macro_f1": 0.8675062896102894,
+      "dev_bio_violations": 28.0
+    },
+    {
+      "epoch": 18.0,
+      "train_loss": 1.0400816964197763,
+      "dev_micro_f1": 0.9073925807312517,
+      "dev_macro_f1": 0.866342862985654,
+      "dev_bio_violations": 28.0
+    },
+    {
+      "epoch": 19.0,
+      "train_loss": 0.9668476864506926,
+      "dev_micro_f1": 0.9077794256437912,
+      "dev_macro_f1": 0.8687047847461272,
+      "dev_bio_violations": 18.0
+    },
+    {
+      "epoch": 20.0,
+      "train_loss": 0.8739373819737495,
+      "dev_micro_f1": 0.9111335351496805,
+      "dev_macro_f1": 0.8745326261154048,
+      "dev_bio_violations": 24.0
+    },
+    {
+      "epoch": 21.0,
+      "train_loss": 0.8399568249153185,
+      "dev_micro_f1": 0.9104317511397156,
+      "dev_macro_f1": 0.8717287258171247,
+      "dev_bio_violations": 23.0
+    },
+    {
+      "epoch": 22.0,
+      "train_loss": 0.8144987508465972,
+      "dev_micro_f1": 0.9117963910584432,
+      "dev_macro_f1": 0.8730342491498465,
+      "dev_bio_violations": 13.0
+    },
+    {
+      "epoch": 23.0,
+      "train_loss": 0.7479434939030605,
+      "dev_micro_f1": 0.9124697010503635,
+      "dev_macro_f1": 0.8742479745865601,
+      "dev_bio_violations": 17.0
+    },
+    {
+      "epoch": 24.0,
+      "train_loss": 0.7366145517252669,
+      "dev_micro_f1": 0.915128654182945,
+      "dev_macro_f1": 0.8778533441308021,
+      "dev_bio_violations": 23.0
+    },
+    {
+      "epoch": 25.0,
+      "train_loss": 0.6943663932100127,
+      "dev_micro_f1": 0.9109547738693469,
+      "dev_macro_f1": 0.8700171169066684,
+      "dev_bio_violations": 23.0
+    },
+    {
+      "epoch": 26.0,
+      "train_loss": 0.6411618884605698,
+      "dev_micro_f1": 0.9172708178060844,
+      "dev_macro_f1": 0.8781234250268491,
+      "dev_bio_violations": 16.0
+    },
+    {
+      "epoch": 27.0,
+      "train_loss": 0.6055570297603365,
+      "dev_micro_f1": 0.9133026280140883,
+      "dev_macro_f1": 0.8734958188774389,
+      "dev_bio_violations": 13.0
+    },
+    {
+      "epoch": 28.0,
+      "train_loss": 0.5809985712359224,
+      "dev_micro_f1": 0.9108524523985737,
+      "dev_macro_f1": 0.8730293118117531,
+      "dev_bio_violations": 15.0
+    },
+    {
+      "epoch": 29.0,
+      "train_loss": 0.5515150923305486,
+      "dev_micro_f1": 0.912259453640156,
+      "dev_macro_f1": 0.8764437280578002,
+      "dev_bio_violations": 12.0
+    },
+    {
+      "epoch": 30.0,
+      "train_loss": 0.5517278236301639,
+      "dev_micro_f1": 0.9133301611039358,
+      "dev_macro_f1": 0.873250709441247,
+      "dev_bio_violations": 16.0
+    }
+  ],
+  "dev": {
+    "micro_precision": 0.9296799890124983,
+    "micro_recall": 0.9051885530890612,
+    "micro_f1": 0.9172708178060844,
+    "macro_f1": 0.8781234250268491,
+    "per_entity": {
+      "AGE": {
+        "precision": 0.9413333333333334,
+        "recall": 0.9778393351800554,
+        "f1": 0.9592391304347826,
+        "support": 361
+      },
+      "DATE": {
+        "precision": 0.9717668488160291,
+        "recall": 0.9673617407071623,
+        "f1": 0.9695592912312586,
+        "support": 1103
+      },
+      "GENDER": {
+        "precision": 0.9626865671641791,
+        "recall": 0.9314079422382672,
+        "f1": 0.946788990825688,
+        "support": 277
+      },
+      "JOB": {
+        "precision": 0.8651685393258427,
+        "recall": 0.5833333333333334,
+        "f1": 0.6968325791855204,
+        "support": 132
+      },
+      "LOCATION": {
+        "precision": 0.9287844891871737,
+        "recall": 0.9101205699671173,
+        "f1": 0.919357815095036,
+        "support": 2737
+      },
+      "NAME": {
+        "precision": 0.88,
+        "recall": 0.5851063829787234,
+        "f1": 0.7028753993610223,
+        "support": 188
+      },
+      "ORGANIZATION": {
+        "precision": 0.88,
+        "recall": 0.838475499092559,
+        "f1": 0.858736059479554,
+        "support": 551
+      },
+      "PATIENT_ID": {
+        "precision": 0.9436405178979437,
+        "recall": 0.9710031347962382,
+        "f1": 0.9571263035921205,
+        "support": 1276
+      },
+      "SYMPTOM_AND_DISEASE": {
+        "precision": 0.8789986091794159,
+        "recall": 0.825065274151436,
+        "f1": 0.8511784511784511,
+        "support": 766
+      },
+      "TRANSPORTATION": {
+        "precision": 0.9195402298850575,
+        "recall": 0.9195402298850575,
+        "f1": 0.9195402298850575,
+        "support": 87
+      }
+    },
+    "bio_violations": 16
+  },
+  "test": {
+    "micro_precision": 0.9256292906178489,
+    "micro_recall": 0.8962079250106519,
+    "micro_f1": 0.9106810408278132,
+    "macro_f1": 0.8589311988857424,
+    "per_entity": {
+      "AGE": {
+        "precision": 0.9414715719063546,
+        "recall": 0.9673539518900344,
+        "f1": 0.9542372881355933,
+        "support": 582
+      },
+      "DATE": {
+        "precision": 0.9709794437726723,
+        "recall": 0.9709794437726723,
+        "f1": 0.9709794437726723,
+        "support": 1654
+      },
+      "GENDER": {
+        "precision": 0.9515418502202643,
+        "recall": 0.935064935064935,
+        "f1": 0.9432314410480349,
+        "support": 462
+      },
+      "JOB": {
+        "precision": 0.7217391304347827,
+        "recall": 0.4797687861271676,
+        "f1": 0.576388888888889,
+        "support": 173
+      },
+      "LOCATION": {
+        "precision": 0.9198447134048869,
+        "recall": 0.9070029272686332,
+        "f1": 0.9133786848072563,
+        "support": 4441
+      },
+      "NAME": {
+        "precision": 0.897196261682243,
+        "recall": 0.6037735849056604,
+        "f1": 0.7218045112781954,
+        "support": 318
+      },
+      "ORGANIZATION": {
+        "precision": 0.864406779661017,
+        "recall": 0.7937743190661478,
+        "f1": 0.8275862068965517,
+        "support": 771
+      },
+      "PATIENT_ID": {
+        "precision": 0.941944847605225,
+        "recall": 0.971072319201995,
+        "f1": 0.956286836935167,
+        "support": 2005
+      },
+      "SYMPTOM_AND_DISEASE": {
+        "precision": 0.8917835671342685,
+        "recall": 0.7834507042253521,
+        "f1": 0.8341143392689784,
+        "support": 1136
+      },
+      "TRANSPORTATION": {
+        "precision": 0.9371428571428572,
+        "recall": 0.8497409326424871,
+        "f1": 0.8913043478260869,
+        "support": 193
+      }
+    },
+    "bio_violations": 24
+  },
+  "config": {
+    "experiment_name": "bilstm_crf_nochar_word",
+    "seed": 42,
+    "data": {
+      "level": "word",
+      "data_dir": "data",
+      "min_word_freq": 1,
+      "max_word_len": 30
+    },
+    "model": {
+      "name": "bilstm_crf",
+      "word_emb_dim": 100,
+      "use_char": false,
+      "char_encoder_type": "cnn",
+      "char_emb_dim": 30,
+      "char_out_dim": 50,
+      "char_kernel_size": 3,
+      "hidden_dim": 256,
+      "num_layers": 1,
+      "dropout": 0.5,
+      "use_crf": true
+    },
+    "training": {
+      "batch_size": 32,
+      "epochs": 30,
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "grad_clip": 5.0,
+      "patience": 5,
+      "checkpoint_dir": "checkpoints/bilstm_crf_nochar"
+    },
+    "logging": {
+      "use_wandb": true,
+      "wandb_entity": "NER-UET",
+      "wandb_project": "ner-phoner-covid19-uet",
+      "output_dir": "outputs/metrics"
+    }
+  }
+}

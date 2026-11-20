@@ -1,9 +1,27 @@
-/data/
-/checkpoints/
-/wandb/
-__pycache__/
-*.pyc
-.pytest_cache/
+# Dữ liệu, trọng số mô hình và log huấn luyện (không đưa vào Git)
+data/
+checkpoints/
+wandb/
+outputs/predictions/
 *.pt
+*.pth
+*.ckpt
 *.bin
 *.safetensors
+
+# Python, test & môi trường ảo
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Notebook & hệ điều hành
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+
+# Tài liệu nháp nội bộ
+docs/superpowers/plans/
