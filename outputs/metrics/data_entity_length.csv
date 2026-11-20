@@ -1,0 +1,13 @@
+,mean_len,mean_len,max_len,max_len,single_token_%,single_token_%
+level,syllable,word,syllable,word,syllable,word
+type,,,,,,
+AGE,1.0,1.0,2.0,2.0,99.7,99.7
+DATE,1.98,1.98,5.0,5.0,50.9,50.9
+GENDER,1.03,1.0,2.0,1.0,97.4,100.0
+LOCATION,3.28,1.97,21.0,13.0,8.0,44.1
+OCCUPATION,2.55,1.3,6.0,4.0,1.0,80.0
+ORGANIZATION,5.24,3.24,17.0,14.0,1.7,4.4
+PATIENT_ID,1.0,1.0,9.0,5.0,99.8,99.8
+PERSON_NAME,1.23,1.04,4.0,2.0,87.4,96.3
+SYMPTOM_AND_DISEASE,2.58,2.08,11.0,7.0,23.8,33.6
+TRANSPORTATION,1.31,1.3,4.0,4.0,74.8,74.8
